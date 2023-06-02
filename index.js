@@ -4,8 +4,8 @@ const config = require('./config/config')
 const cors = require('cors')
 
 const app = express()
-app.use(cors({origin:'*'}))
 global.appRootPath = __dirname
+app.use(cors({origin:'*'}))
 
 require('./database/mongoose')
 require('./middlewares/index')(app)
