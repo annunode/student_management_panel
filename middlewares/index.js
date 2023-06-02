@@ -1,11 +1,11 @@
 /* eslint-disable no-undef */
 require('dotenv').config()
 const express = require('express')
-const mongoose = require('mongoose')
+// const mongoose = require('mongoose')
 const path = require('path')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const cachegoose = require('recachegoose')
+// const cachegoose = require('recachegoose')
 const helmet = require('helmet')
 const Sentry = require('@sentry/node')
 const compression = require('compression')
@@ -21,11 +21,6 @@ module.exports = (app) => {
 			tracesSampleRate: 1.0
 		})
 	}
-	cachegoose(mongoose, {
-		engine: 'redis',
-		host: config.REDIS_HOST,
-		port: config.REDIS_PORT
-	})
 
 	// app.use(morgan('dev'))
 
