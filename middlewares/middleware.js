@@ -268,13 +268,13 @@ const isTeacherAuthenticated = async (req, res, next) => {
 			})
 		}
 
-		const isBlackList = await redisClient.get(`BlackListToken:${token}`)
-		if (isBlackList) {
-			return res.status(status.Unauthorized).jsonp({
-				status: jsonStatus.Unauthorized,
-				message: messages[req.userLanguage].err_unauthorized
-			})
-		}
+		// const isBlackList = await redisClient.get(`BlackListToken:${token}`)
+		// if (isBlackList) {
+		// 	return res.status(status.Unauthorized).jsonp({
+		// 		status: jsonStatus.Unauthorized,
+		// 		message: messages[req.userLanguage].err_unauthorized
+		// 	})
+		// }
 
 		req.teacher= {}
 		let user
