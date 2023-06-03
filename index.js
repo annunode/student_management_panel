@@ -6,7 +6,7 @@ const app = express()
 app.use(cors({ origin: '*' }))
 global.appRootPath = __dirname
 
-require('./database/mongoose')
+require('./database/mongoose')(app)
 require('./middlewares/index')(app)
 
 require('./middlewares/routes')(app)
