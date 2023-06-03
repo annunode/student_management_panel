@@ -38,10 +38,8 @@ const teacherSchema = new mongoose.Schema({
 
 teacherSchema.statics.filterData = function (teacher) {
 	teacher.__v = undefined
-	teacher.sVerificationToken = undefined
 	teacher.aJwtTokens = undefined
-	teacher.sDepositToken = undefined
-	teacher.sPassword = undefined
+	teacher.password = undefined
 	teacher.dUpdatedAt = undefined
 	return teacher
 }

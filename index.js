@@ -1,6 +1,7 @@
 const express = require('express')
 
 const cors = require('cors')
+const StudentsModel = require('./models-routes-services/students/model')
 
 const app = express()
 app.use(cors({ origin: '*' }))

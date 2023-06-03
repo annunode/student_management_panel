@@ -3,7 +3,7 @@ const { status, jsonStatus } = require('../helper/api.responses')
 module.exports = (app) => {
 	app.use('/api', [
 		require('../models-routes-services/teachers/routes'),
-		// require('../models-routes-services/students/routes'),
+		require('../models-routes-services/students/routes'),
 		// require('../models-routes-services/course/routes'),
 		// require('../models-routes-services/admin/routes')
 	])

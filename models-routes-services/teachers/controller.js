@@ -4,6 +4,7 @@ const TeachersModel = require('../teachers/model')
 const { messages, status, jsonStatus } = require('../../helper/api.responses')
 const { removenull, catchError, pick} = require('../../helper/utilities.services')
 const config = require('../../config/config')
+const { username } = require('../../lang/english/words')
 
 class TeacherAuth {
 	async login(req, res) {
@@ -17,7 +18,7 @@ class TeacherAuth {
   
 			login = String(login).toLowerCase().trim()
   
-			let teacher = await TeachersModel.findOne({ $or: [{ email: login }, { phoneNumber: login }], status: 'Y' })
+			let teacher = await TeachersModel.findOne({ $or: [{ email: login }, { phoneNumber: login }, { username: login }], status: 'Y' })
 
   
 			if (!teacher) {
