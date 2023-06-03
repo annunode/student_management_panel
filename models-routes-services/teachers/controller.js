@@ -15,7 +15,7 @@ class TeacherAuth {
 			// const rateLimit = await checkRateLimit(5, `rlpassword:${login}`, getIp(req))
 			// if (rateLimit === 'LIMIT_REACHED') return res.status(status.TooManyRequest).jsonp({ status: jsonStatus.TooManyRequest, message: messages[req.userLanguage].limit_reached.replace('##', messages[req.userLanguage].password) })
   
-			login = login.toLowerCase().trim()
+			login = String(login).toLowerCase().trim()
   
 			let teacher = await TeachersModel.findOne({ $or: [{ email: login }, { phoneNumber: login }], status: 'Y' })
 
