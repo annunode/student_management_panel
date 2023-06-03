@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const DBConnect = require('../../database/mongoose')
 
 const studentSchema = new mongoose.Schema({
 	firstName: {
@@ -33,10 +32,10 @@ const studentSchema = new mongoose.Schema({
 		required: true
 	},
 	aCourse: [{
-        
+
 	}]
 })
-  
-const Student = DBConnect.model('Student', studentSchema)
+
+const Student = mongoose.model('Student', studentSchema)
 
 module.exports = Student

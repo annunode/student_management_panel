@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const DBConnect = require('../../database/mongoose')
 
 const adminSchema = new mongoose.Schema({
 	firstName: {
@@ -25,6 +24,6 @@ const adminSchema = new mongoose.Schema({
 	}
 })
 
-const Admin = DBConnect.model('Admin', adminSchema)
+const Admin = mongoose.model('Admin', adminSchema)
 
 module.exports = Admin

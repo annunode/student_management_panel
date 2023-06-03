@@ -1,6 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 const mongoose = require('mongoose')
-const DBConnect = require('../../database/mongoose')
 const config = require('../../config/config')
 const jwt = require('jsonwebtoken')
 
@@ -34,7 +33,7 @@ const teacherSchema = new mongoose.Schema({
 	aJwtTokens: [{
 		sToken: { type: String },
 		dTimeStamp: { type: Date, default: Date.now }
-	  }],
+	}],
 })
 
 teacherSchema.statics.filterData = function (teacher) {
@@ -45,21 +44,21 @@ teacherSchema.statics.filterData = function (teacher) {
 	teacher.sPassword = undefined
 	teacher.dUpdatedAt = undefined
 	return teacher
-} 
+}
 teacherSchema.statics.findByToken = function (token) {
 	var teacher = this
 	var decoded
 	try {
-	  decoded = jwt.verify(token, config.JWT_SECRET)
+		decoded = jwt.verify(token, config.JWT_SECRET)
 	} catch (e) {
-	  return Promise.reject(e)
+		return Promise.reject(e)
 	}
 	var query = {
-	  _id: decoded._id,
-	  status: 'Y'
+		_id: decoded._id,
+		status: 'Y'
 	}
 	return teacher.findOne(query)
 }
-const TeacherMoel = DBConnect.model('Teacher', teacherSchema)
+const TeacherModel = mongoose.model('Teacher', teacherSchema)
 
-module.exports = TeacherMoel
+module.exports = TeacherModel
