@@ -9,5 +9,6 @@ module.exports = {
   feedback: 'Feedback',
   checkUser: 'User exist checked',
   student: 'Student',
+  students: 'Students',
   teacher: 'Teacher'
 }

@@ -597,5 +597,6 @@ module.exports = {
 	removenull,
 	catchError,
 	handleCatchError,
-	pick
+	pick,
+	getPaginationValues
 }

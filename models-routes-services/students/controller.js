@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 // const bcrypt = require('bcryptjs')
 const StudentsModel = require('../students/model')
 const { messages, status, jsonStatus } = require('../../helper/api.responses')
-const { removenull, catchError, pick} = require('../../helper/utilities.services')
+const { removenull, catchError, pick, getPaginationValues} = require('../../helper/utilities.services')
 const config = require('../../config/config')
 
 class StudentAuth {
@@ -62,6 +62,37 @@ class StudentAuth {
 			})
 		} catch (error) {
 			return catchError('StudentAuth.login', error, req, res)
+		}
+	}
+
+	async list(req,res) {
+		try{
+			const { start, limit, sorting } = getPaginationValues(req.query)
+			const data = await StudentsModel.find().skip(start).limit(limit).lean()
+			return res.status(status.OK).set('Authorization', newToken.sToken).jsonp({
+				status: jsonStatus.OK,
+				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].Students),
+				data
+			})
+
+		}catch(error){
+			return catchError('StudentAuth.list', error, req,res)
+		}
+	}
+
+	async getSingeleStudent(req,res) {
+		try{
+			const data = await StudentsModel.findOne({_id: req.params.id}).lean()
+			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].Student),
+		})
+			return res.status(status.OK).jsonp({
+				status: jsonStatus.OK,
+				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].Students),
+				data
+			})
+			
+		}catch(error){
+			return catchError('StudentAuth.getSingeleStudent', error, req,res)
 		}
 	}
 }
