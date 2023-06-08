@@ -4,7 +4,6 @@
  * @method {isUserAuthenticated} is for authenticating the token.
  * @method {findByToken} is specified in user.model.js
  */
-const Sentry = require('@sentry/node')
 const jwt = require('jsonwebtoken')
 var Crypt = require('hybrid-crypto-js').Crypt
 var crypt = new Crypt()
@@ -110,7 +109,108 @@ const validateAdmin = (sKey, eType) => {
 				return next(null, null)
 			}
 		} catch (error) {
-			if (process.env.NODE_ENV === 'production') Sentry.captureMessage(error)
+			return res.status(status.InternalServerError).jsonp({
+				status: jsonStatus.InternalServerError,
+				message: messages[req.userLanguage].error
+			})
+		}
+	}
+}
+
+const validateTeacher = (sKey, eType) => {
+	return async (req, res, next) => {
+		try {
+			const token = req.header('Authorization')
+			req.userLanguage = 'English'
+			if (!token) {
+				return res.status(status.Unauthorized).jsonp({
+					status: jsonStatus.Unauthorized,
+					message: messages[req.userLanguage].err_unauthorized
+				})
+			}
+			let teacher
+			try {
+				teacher = await TeachersModel.findByToken(token)
+			} catch (err) {
+				return res.status(status.Unauthorized).jsonp({
+					status: jsonStatus.Unauthorized,
+					message: messages[req.userLanguage].err_unauthorized
+				})
+			}
+			if (!teacher) {
+				return res.status(status.Unauthorized).jsonp({
+					status: jsonStatus.Unauthorized,
+					message: messages[req.userLanguage].err_unauthorized
+				})
+			}
+			req.teacher = teacher
+
+			let errors
+			if (req.teacher.eType === 'SUPER') {
+				errors = validationResult(req)
+				if (!errors.isEmpty()) {
+					return res.status(status.UnprocessableEntity).jsonp({
+						status: jsonStatus.UnprocessableEntity,
+						errors: errors.array()
+					})
+				}
+
+				return next(null, null)
+			} else {
+				if (!req.teacher.iRoleId) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
+
+				const role = await RolesModel.findOne({ _id: ObjectId(req.teacher.iRoleId), eStatus: 'Y' }, { aPermissions: 1 }).lean()
+				if (!role) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
+
+				const hasPermission = role.aPermissions.find((permission) => {
+					return (
+						permission.sKey === sKey &&
+            (permission.eType === eType ||
+              (eType === 'R' && permission.eType === 'W'))
+					)
+				})
+
+				if (!hasPermission) {
+					let hasSubAdminPermission
+					if (sKey === 'DEPOSIT' && eType === 'W') {
+						hasSubAdminPermission = role.aPermissions.find((permission) => {
+							return (
+								permission.sKey === 'SYSTEM_USERS' && permission.eType === 'W'
+							)
+						})
+					}
+					if (!hasSubAdminPermission) {
+						let message
+
+						switch (eType) {
+						case 'R':
+							message = messages[req.userLanguage].read_access_denied.replace('##', sKey)
+							break
+						case 'W':
+							message = messages[req.userLanguage].write_access_denied.replace('##', sKey)
+							break
+						case 'N':
+							message = messages[req.userLanguage].access_denied
+							break
+						}
+
+						return res.status(status.Unauthorized).jsonp({
+							status: jsonStatus.Unauthorized,
+							message
+						})
+					}
+				}
+				errors = validationResult(req)
+				if (!errors.isEmpty()) {
+					return res.status(status.UnprocessableEntity).jsonp({
+						status: jsonStatus.UnprocessableEntity,
+						errors: errors.array()
+					})
+				}
+
+				return next(null, null)
+			}
+		} catch (error) {
 			return res.status(status.InternalServerError).jsonp({
 				status: jsonStatus.InternalServerError,
 				message: messages[req.userLanguage].error
@@ -144,7 +244,7 @@ const isAdminAuthenticated = async (req, res, next) => {
 
 		return next(null, null)
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') Sentry.captureMessage(error)
+		
 		return res.status(status.InternalServerError).jsonp({
 			status: jsonStatus.InternalServerError,
 			message: messages[req.userLanguage].error
@@ -177,7 +277,7 @@ const isAdminAuthenticatedToDeposit = async (req, res, next) => {
 
 		return next(null, null)
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') Sentry.captureMessage(error)
+		
 		return res.status(status.InternalServerError).jsonp({
 			status: jsonStatus.InternalServerError,
 			message: messages[req.userLanguage].error
@@ -318,7 +418,7 @@ const isTeacherAuthenticated = async (req, res, next) => {
 		}
 		return next(null, null)
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') Sentry.captureMessage(error)
+		
 		return res.status(status.InternalServerError).jsonp({
 			status: jsonStatus.InternalServerError,
 			message: messages[req.userLanguage].error
@@ -372,7 +472,7 @@ const isSystemUserAuthenticated = async (req, res, next) => {
 		}
 		return next(null, null)
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') Sentry.captureMessage(error)
+		
 		return res.status(status.InternalServerError).jsonp({
 			status: jsonStatus.InternalServerError,
 			message: messages[req.userLanguage].error
@@ -387,7 +487,7 @@ const isBlockedByAdmin = async (req, res, next) => {
 
 		return next(null, null)
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') Sentry.captureMessage(error)
+		
 		return res.status(status.InternalServerError).jsonp({
 			status: jsonStatus.InternalServerError,
 			message: messages[req.userLanguage].error
@@ -451,7 +551,7 @@ const validateRoute = async (req, res, next) => {
 		}
 		return next(null, null)
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') Sentry.captureMessage(error)
+		
 		return res.status(status.InternalServerError).jsonp({
 			status: jsonStatus.InternalServerError,
 			message: messages[req.userLanguage].error
@@ -472,5 +572,6 @@ module.exports = {
 	changeDeviceTokenField,
 	isBlockedByAdmin,
 	isAdminAuthenticatedToDeposit,
-	validateRoute
+	validateRoute,
+	validateTeacher
 }

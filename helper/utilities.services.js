@@ -11,7 +11,6 @@ const axios = require('axios')
 const Crypt = require('hybrid-crypto-js').Crypt
 const crypt = new Crypt()
 const data = require('../data')
-const Sentry = require('@sentry/node')
 const { imageFormat } = require('../data')
 const fs = require('fs')
 const { randomInt, createHash } = require('crypto')
@@ -92,7 +91,6 @@ const catchError = (name, error, req, res) => {
 }
 
 const handleCatchError = (error) => {
-	if (process.env.NODE_ENV === 'production') Sentry.captureMessage(error)
 	const { data = undefined, status = undefined } = error.response ?? {}
 
 	if (!status) console.log('**********ERROR***********', error)

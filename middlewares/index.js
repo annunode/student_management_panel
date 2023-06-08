@@ -5,9 +5,7 @@ const express = require('express')
 const path = require('path')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-// const cachegoose = require('recachegoose')
 const helmet = require('helmet')
-const Sentry = require('@sentry/node')
 const compression = require('compression')
 const hpp = require('hpp')
 
@@ -15,13 +13,6 @@ const config = require('../config/config')
 const data = require('../data')
 
 module.exports = (app) => {
-	if (process.env.NODE_ENV === 'production') {
-		Sentry.init({
-			dsn: 'https://ca4d3ad7705241a1acf8de77d9e85113@o4504490770235392.ingest.sentry.io/4504490774757376',
-			tracesSampleRate: 1.0
-		})
-	}
-
 	// app.use(morgan('dev'))
 
 	app.use(cors())

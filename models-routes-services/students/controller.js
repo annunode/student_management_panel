@@ -95,6 +95,25 @@ class StudentAuth {
 			return catchError('StudentAuth.getSingeleStudent', error, req,res)
 		}
 	}
+	async addStudent(req,res) {
+		try{
+            const { classTeacherId } = req.body
+            req.body = pick(req.body, ['name', 'classTeacherId', 'status'])
+
+            const teacher = TeachersModel.findOne({_id: classTeacherId, status: 'Y' }, { _id: 1 }).lean()
+            if(!teacher) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher) })
+
+			const data = await ClassModel.create({...req.body})
+			return res.status(status.OK).jsonp({
+				status: jsonStatus.OK,
+				message: messages[req.userLanguage].add_success.replace('##',  messages[req.userLanguage].Class),
+				data
+			})
+			
+		}catch(error){
+			return catchError('ClassController.addClass', error, req,res)
+		}
+	}
 }
 
 module.exports = new StudentAuth()

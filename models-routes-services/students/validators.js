@@ -8,8 +8,13 @@ const login = [
 const getStudent = [
 	param('id').not().isEmpty().isMongoId()
 ]
+
+const addStudent = [
+	
+]
   
 module.exports = {
 	login,
-	getStudents
+	getStudent,
+	addStudent
 }
