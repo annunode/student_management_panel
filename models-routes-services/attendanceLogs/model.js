@@ -1,32 +1,16 @@
 const mongoose = require('mongoose')
-const jwt = require('jsonwebtoken')
+const StudentsModel = require('../students/model')
+const TeachersModel = require('../teachers/model')
+const { attendanceStatus } = require('../../data')
 
 const attendanceSchema = new mongoose.Schema({
-	iTeacherId,iStudentId, attendance, onDAte
+	teacherId: {type: mongoose.Types.ObjectId, ref:TeachersModel, required: true},
+	studentId: {type: mongoose.Types.ObjectId, ref:StudentsModel, required: true},
+	attendance:{type:String, enum: attendanceStatus, required: true},
+	onDate: { type: Date}
 })
 
-studentSchema.statics.filterData = function (student) {
-	student.__v = undefined
-	student.aJwtTokens = undefined
-	student.sPassword = undefined
-	student.dUpdatedAt = undefined
-	student.password = undefined
-	return student
-}
-studentSchema.statics.findByToken = function (token) {
-	var student = this
-	var decoded
-	try {
-		decoded = jwt.verify(token, config.JWT_SECRET)
-	} catch (e) {
-		return Promise.reject(e)
-	}
-	var query = {
-		_id: decoded._id,
-		status: 'Y'
-	}
-	return student.findOne(query)
-}
-const StudentsModel = mongoose.model('Student', studentSchema)
 
-// module.exports = StudentsModel
+const AttendanceLogsModel = mongoose.model('Student', attendanceSchema)
+
+module.exports = AttendanceLogsModel

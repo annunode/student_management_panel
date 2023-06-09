@@ -4,6 +4,8 @@ const StudentsModel = require('../students/model')
 const { messages, status, jsonStatus } = require('../../helper/api.responses')
 const { removenull, catchError, pick, getPaginationValues} = require('../../helper/utilities.services')
 const config = require('../../config/config')
+// const TeachersModel = require('../teachers/model')
+const ClassModel = require('../class/model')
 
 class StudentAuth {
 	async login(req, res) {
@@ -61,22 +63,22 @@ class StudentAuth {
 				Authorization: newToken.sToken
 			})
 		} catch (error) {
-			return catchError('StudentAuth.login', error, req, res)
+			return catchError('studentController.login', error, req, res)
 		}
 	}
 
 	async list(req,res) {
 		try{
 			const { start, limit, sorting } = getPaginationValues(req.query)
-			const data = await StudentsModel.find().skip(start).limit(limit).lean()
-			return res.status(status.OK).set('Authorization', newToken.sToken).jsonp({
+			const data = await StudentsModel.find().skip(start).limit(limit).sort(sorting).lean()
+			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
 				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].Students),
 				data
 			})
 
 		}catch(error){
-			return catchError('StudentAuth.list', error, req,res)
+			return catchError('studentController.list', error, req,res)
 		}
 	}
 
@@ -84,7 +86,7 @@ class StudentAuth {
 		try{
 			const data = await StudentsModel.findOne({_id: req.params.id}).lean()
 			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].Student),
-		})
+			})
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
 				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].Students),
@@ -97,13 +99,13 @@ class StudentAuth {
 	}
 	async addStudent(req,res) {
 		try{
-            const { classTeacherId } = req.body
-            req.body = pick(req.body, ['name', 'classTeacherId', 'status'])
+			const { classId } = req.body
+			req.body = pick(req.body, ['classId','firstName','lastName','dateOfBirth','gender','email','phoneNumber','username','address','status'])
 
-            const teacher = TeachersModel.findOne({_id: classTeacherId, status: 'Y' }, { _id: 1 }).lean()
-            if(!teacher) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher) })
+			const classes = ClassModel.findOne({_id: classId, status: 'Y' }, { _id: 1 }).lean()
+			if(!classes) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher) })
 
-			const data = await ClassModel.create({...req.body})
+			const data = await StudentsModel.create({...req.body})
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
 				message: messages[req.userLanguage].add_success.replace('##',  messages[req.userLanguage].Class),
@@ -111,7 +113,25 @@ class StudentAuth {
 			})
 			
 		}catch(error){
-			return catchError('ClassController.addClass', error, req,res)
+			return catchError('studentController.addClass', error, req,res)
+		}
+	}
+	async updateStudent(req,res) {
+		try{
+			const { classId } = req.body
+			req.body = pick(req.body, ['classId','firstName','lastName','dateOfBirth','gender','email','phoneNumber','username','address','status'])
+
+			const classes = ClassModel.findOne({_id: classId, status: 'Y' }, { _id: 1 }).lean()
+			if(!classes) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher) })
+
+			await StudentsModel.updateOne({_id: req.params.id }, {...req.body})
+			return res.status(status.OK).jsonp({
+				status: jsonStatus.OK,
+				message: messages[req.userLanguage].update_success.replace('##',  messages[req.userLanguage].Class),
+			})
+			
+		}catch(error){
+			return catchError('studentController.updateStudent', error, req,res)
 		}
 	}
 }

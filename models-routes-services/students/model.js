@@ -1,5 +1,8 @@
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
+const ClassModel = require('../class/model')
+const { gender } = require('../../data')
+const config = require('../../config/config')
 
 const studentSchema = new mongoose.Schema({
 	firstName: {
@@ -16,7 +19,7 @@ const studentSchema = new mongoose.Schema({
 	},
 	gender: {
 		type: String,
-		enum: ['Male', 'Female', 'Other'],
+		enum: gender,
 		required: true
 	},
 	email: {
@@ -48,10 +51,13 @@ const studentSchema = new mongoose.Schema({
 		type: String,
 		default: 'Y'
 	},
-	aJwtTokens: [{
-		sToken: { type: String },
-		dTimeStamp: { type: Date, default: Date.now }
-	}],
+	classId: [
+		{
+			type: mongoose.Types.ObjectId,
+			ref: ClassModel,
+			required: true
+		}
+	]
 })
 
 studentSchema.statics.filterData = function (student) {

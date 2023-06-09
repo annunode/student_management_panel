@@ -9,7 +9,7 @@ const classSchema = new mongoose.Schema({
 		default: 'Y'
 	},
     classTeacherId: {
-        type: mongoose.Schema.DataTypes.ObjectId,
+        type: mongoose.Types.ObjectId,
         ref: TeacherModel
     }
 })

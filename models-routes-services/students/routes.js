@@ -9,6 +9,7 @@ router.get('/student/:id/v1', validators.getStudent, validate, studentController
 router.get('/student/list/v1', validate, studentController.list)
 
 router.post('/teacher/student/v1',validators.addStudent, validateTeacher('STUDENT','W'), studentController.addStudent)
+router.put('/teacher/student/:id/v1',validators.addStudent, validateTeacher('STUDENT','W'), studentController.updateStudent)
 
 
 module.exports = router
