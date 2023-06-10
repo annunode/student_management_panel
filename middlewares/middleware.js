@@ -203,7 +203,6 @@ const validateTeacher = (sKey, eType) => {
 					}
 				}
 				errors = validationResult(req)
-				console.log(errors)
 				if (!errors.isEmpty()) {
 					return res.status(status.UnprocessableEntity).jsonp({
 						status: jsonStatus.UnprocessableEntity,
@@ -214,7 +213,6 @@ const validateTeacher = (sKey, eType) => {
 				return next(null, null)
 			}
 		} catch (error) {
-			console.log('error',error)
 			return res.status(status.InternalServerError).jsonp({
 				status: jsonStatus.InternalServerError,
 				message: messages[req.userLanguage].error
@@ -256,91 +254,6 @@ const isAdminAuthenticated = async (req, res, next) => {
 	}
 }
 
-const isAdminAuthenticatedToDeposit = async (req, res, next) => {
-	try {
-		const token = req.header('Authorization')
-		const lang = req.header('Language')
-		if (lang === 'English') {
-			req.userLanguage = 'English'
-		}
-		req.userLanguage = 'English'
-		if (!token) {
-			return res.status(status.Unauthorized).jsonp({
-				status: jsonStatus.Unauthorized,
-				message: messages[req.userLanguage].err_unauthorized
-			})
-		}
-		const admin = await AdminsModel.findByDepositToken(token)
-		if (!admin) {
-			return res.status(status.Unauthorized).jsonp({
-				status: jsonStatus.Unauthorized,
-				message: messages[req.userLanguage].err_unauthorized
-			})
-		}
-		req.admin = admin
-
-		return next(null, null)
-	} catch (error) {
-		
-		return res.status(status.InternalServerError).jsonp({
-			status: jsonStatus.InternalServerError,
-			message: messages[req.userLanguage].error
-		})
-	}
-}
-
-const setLanguage = (req, res, next) => {
-	const lang = req.header('Language')
-	if (lang === 'English') {
-		req.userLanguage = 'English'
-	}
-	req.userLanguage = 'English'
-
-	return next(null, null)
-}
-
-const isAdminAuthorized = (sKey, eType) => {
-	return async function (req, res, next) {
-		if (req.admin.eType === 'SUPER') {
-			next()
-		} else {
-			if (!req.admin.iRoleId) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
-
-			const role = await RolesModel.findOne({ _id: ObjectId(req.admin.iRoleId), eStatus: 'Y' }, { aPermissions: 1 }).lean()
-			if (!role) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
-
-			const hasPermission = role.aPermissions.find((permission) => {
-				return (
-					permission.sKey === sKey &&
-          (permission.eType === eType ||
-            (eType === 'R' && permission.eType === 'W'))
-				)
-			})
-
-			if (!hasPermission) {
-				let message
-
-				switch (eType) {
-				case 'R':
-					message = messages[req.userLanguage].read_access_denied.replace('##', sKey)
-					break
-				case 'W':
-					message = messages[req.userLanguage].write_access_denied.replace('##', sKey)
-					break
-				case 'N':
-					message = messages[req.userLanguage].access_denied
-					break
-				}
-
-				return res.status(status.Unauthorized).jsonp({
-					status: jsonStatus.Unauthorized,
-					message
-				})
-			}
-			next()
-		}
-	}
-}
 
 const validate = function (req, res, next) {
 	const lang = req.header('Language')
@@ -430,74 +343,7 @@ const isTeacherAuthenticated = async (req, res, next) => {
 	}
 }
 
-const isSystemUserAuthenticated = async (req, res, next) => {
-	try {
-		const token = req.header('Authorization')
-		const lang = req.header('Language')
-		if (lang === 'English') {
-			req.userLanguage = 'English'
-		}
-		req.userLanguage = 'English'
-		if (!token) {
-			return res.status(status.Unauthorized).jsonp({
-				status: jsonStatus.Unauthorized,
-				message: messages[req.userLanguage].err_unauthorized
-			})
-		}
 
-		req.teacher= {}
-		let user
-		try {
-			// user = await UsersModel.findByToken(token)
-			user = jwt.verify(token, config.JWT_SECRET)
-		} catch (err) {
-			return res.status(status.Unauthorized).jsonp({
-				status: jsonStatus.Unauthorized,
-				message: messages[req.userLanguage].err_unauthorized
-			})
-		}
-
-		if (!user) {
-			return res.status(status.Unauthorized).jsonp({
-				status: jsonStatus.Unauthorized,
-				message: messages[req.userLanguage].err_unauthorized
-			})
-		}
-		if (user.eType === 'U') { return res.status(status.NotFound).jsonp({ status: jsonStatus.NotFound, message: messages[req.userLanguage].user_blocked }) }
-
-		req.teacher= user
-
-		const errors = validationResult(req)
-		if (!errors.isEmpty()) {
-			return res.status(status.UnprocessableEntity).jsonp({
-				status: jsonStatus.UnprocessableEntity,
-				errors: errors.array()
-			})
-		}
-		return next(null, null)
-	} catch (error) {
-		
-		return res.status(status.InternalServerError).jsonp({
-			status: jsonStatus.InternalServerError,
-			message: messages[req.userLanguage].error
-		})
-	}
-}
-
-const isBlockedByAdmin = async (req, res, next) => {
-	try {
-		const user = await UsersModel.findById(req.teacher._id).lean()
-		if (!user || user.eStatus !== 'Y') { return res.status(status.NotFound).jsonp({ status: jsonStatus.NotFound, message: messages[req.userLanguage].user_blocked }) }
-
-		return next(null, null)
-	} catch (error) {
-		
-		return res.status(status.InternalServerError).jsonp({
-			status: jsonStatus.InternalServerError,
-			message: messages[req.userLanguage].error
-		})
-	}
-}
 
 const decryption = function (password) {
 	const decrypted = crypt.decrypt(PRIVATE_KEY, password)
@@ -527,55 +373,62 @@ const validateFunctionality = (functionality) => {
 	}
 }
 
-const changeDeviceTokenField = function (req, res, next) {
-	if (req.body) {
-		const { sDeviceId } = req.body
+const isStudentAuthenticated = async (req, res, next) => {
+    try {
+      const token = req.header('Authorization')
+      if (!token) {
+        return res.status(status.Unauthorized).jsonp({
+          status: jsonStatus.Unauthorized,
+          message: messages[req.userLanguage].err_unauthorized
+        })
+      }
+      req.student= {}
+      let user
+	user= jwt.verify(token, config.JWT_SECRET)
+      try {
+        user = jwt.verify(token, config.JWT_SECRET)
+      } catch (err) {
+        if (err.message === 'jwt expired') {}
+        return res.status(status.Unauthorized).jsonp({
+          status: jsonStatus.Unauthorized,
+          message: messages[req.userLanguage].err_unauthorized
+        })
+      }
+  
+      if (!user) {
+        return res.status(status.Unauthorized).jsonp({
+          status: jsonStatus.Unauthorized,
+          message: messages[req.userLanguage].err_unauthorized
+        })
+      }
 
-		req.body.sDeviceToken = sDeviceId
-	}
+      req.student= user
+      req.student.id= ObjectId(user._id)
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        return res.status(status.UnprocessableEntity).jsonp({
+          status: jsonStatus.UnprocessableEntity,
+          errors: errors.array()
+        })
+      }
+      return next(null, null)
+    } catch (error) {
+      return res.status(status.InternalServerError).jsonp({
+        status: jsonStatus.InternalServerError,
+        message: messages[req.userLanguage].error
+      })
+    }
+  }
+  
 
-	next()
-}
-
-// Used For making route open to other plate form
-const validateRoute = async (req, res, next) => {
-	try {
-		const token = req.header('Authorization')
-		const lang = req.header('Language')
-		if (lang === 'English') {
-			req.userLanguage = 'English'
-		}
-		req.userLanguage = 'English'
-
-		if (!token || token !== config.ROUTE_AUTH_TOKEN) {
-			return res.status(status.Unauthorized).jsonp({
-				status: jsonStatus.Unauthorized,
-				message: messages[req.userLanguage].unauthorize_err
-			})
-		}
-		return next(null, null)
-	} catch (error) {
-		
-		return res.status(status.InternalServerError).jsonp({
-			status: jsonStatus.InternalServerError,
-			message: messages[req.userLanguage].error
-		})
-	}
-}
 module.exports = {
 	validateAdmin,
-	setLanguage,
 	validate,
-	isAdminAuthorized,
 	isTeacherAuthenticated,
-	isSystemUserAuthenticated,
 	isAdminAuthenticated,
 	decrypt,
 	decryption,
 	validateFunctionality,
-	changeDeviceTokenField,
-	isBlockedByAdmin,
-	isAdminAuthenticatedToDeposit,
-	validateRoute,
-	validateTeacher
+	validateTeacher,
+	isStudentAuthenticated
 }

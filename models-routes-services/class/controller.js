@@ -41,10 +41,10 @@ class classController {
 		try{
             req.body = pick(req.body, ['name', 'status', 'standard'])
 
-            const teacher = TeachersModel.findOne({_id: req.teacher.id, status: 'Y' }, { _id: 1 }).lean()
+            const teacher = TeachersModel.findOne({_id: req.teacher._id, status: 'Y' }, { _id: 1 }).lean()
             if(!teacher) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher) })
 
-			const data = await ClassModel.create({...req.body, classTeacherId:req.teacher.id})
+			const data = await ClassModel.create({...req.body, classTeacherId:req.teacher._id})
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
 				message: messages[req.userLanguage].add_success.replace('##',  messages[req.userLanguage].class),

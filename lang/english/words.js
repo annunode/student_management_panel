@@ -16,5 +16,7 @@ module.exports = {
   role: 'Role',
   roles: 'Roles',
   classes:'Classes',
-  attedancRecords: 'Attendance Records'
+  attedancRecords: 'Attendance Records',
+  homework: 'Homework',
+  comments: 'Comments'
 }

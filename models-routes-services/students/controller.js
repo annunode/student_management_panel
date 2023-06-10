@@ -44,12 +44,6 @@ class StudentAuth {
   
 			// student can login in LOGIN_HARD_LIMIT_student time.
 			// for e.g. LOGIN_HARD_LIMIT_student=5 -> student can login only for 5 times, After that we'll remove first login token from db.
-			if (student.aJwtTokens.length < config.LOGIN_HARD_LIMIT_student || config.LOGIN_HARD_LIMIT_student === 0) {
-				student.aJwtTokens.push(newToken)
-			} else {
-				student.aJwtTokens.splice(0, 1)
-				student.aJwtTokens.push(newToken)
-			}
   
 			student.dLoginAt = new Date()
 			await student.save()
