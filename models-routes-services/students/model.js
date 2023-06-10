@@ -58,13 +58,13 @@ const studentSchema = new mongoose.Schema({
 			required: true
 		}
 	]
-})
+},{ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
 studentSchema.statics.filterData = function (student) {
 	student.__v = undefined
 	student.aJwtTokens = undefined
 	student.sPassword = undefined
-	student.dUpdatedAt = undefined
+	student.updatedAt = undefined
 	student.password = undefined
 	return student
 }

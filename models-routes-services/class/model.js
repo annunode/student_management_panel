@@ -2,7 +2,8 @@ const mongoose = require('mongoose')
 const TeacherModel = require('../teachers/model')
 const classSchema = new mongoose.Schema({
 	name: {
-        type: String
+        type: String,
+        required: true
     },
 	status: {
 		type: String,
@@ -10,9 +11,15 @@ const classSchema = new mongoose.Schema({
 	},
     classTeacherId: {
         type: mongoose.Types.ObjectId,
-        ref: TeacherModel
+        ref: TeacherModel,
+        required: true
+    },
+    standard:
+    {
+        type: Number,
+        required: true
     }
-})
+},{ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
 
 const ClassModel = mongoose.model('classes', classSchema)

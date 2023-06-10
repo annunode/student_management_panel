@@ -10,7 +10,7 @@ const courseSchema = new mongoose.Schema({
 		ref: 'Teacher',
 		required: true
 	}
-})
+},{ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
 const Course = mongoose.model('Course', courseSchema)
 

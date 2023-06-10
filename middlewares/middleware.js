@@ -14,6 +14,8 @@ const { messages, status, jsonStatus } = require('../helper/api.responses')
 const { validationResult } = require('express-validator')
 const config = require('../config/config')
 const { PRIVATE_KEY } = require('../config/config')
+const RolesModel = require('../models-routes-services/teachers/roles/model')
+const TeachersModel = require('../models-routes-services/teachers/model')
 
 const validateAdmin = (sKey, eType) => {
 	return async (req, res, next) => {
@@ -201,6 +203,7 @@ const validateTeacher = (sKey, eType) => {
 					}
 				}
 				errors = validationResult(req)
+				console.log(errors)
 				if (!errors.isEmpty()) {
 					return res.status(status.UnprocessableEntity).jsonp({
 						status: jsonStatus.UnprocessableEntity,
@@ -211,6 +214,7 @@ const validateTeacher = (sKey, eType) => {
 				return next(null, null)
 			}
 		} catch (error) {
+			console.log('error',error)
 			return res.status(status.InternalServerError).jsonp({
 				status: jsonStatus.InternalServerError,
 				message: messages[req.userLanguage].error

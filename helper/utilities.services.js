@@ -169,7 +169,7 @@ const isValidSportsType = (val) => {
 }
 
 const getPaginationValues = (obj) => {
-	let { start = 0, limit = 10, sort = 'dCreatedAt', order, search } = obj
+	let { start = 0, limit = 10, sort = 'createdAt', order, search } = obj
 
 	start = parseInt(start)
 	limit = parseInt(limit)
@@ -184,7 +184,7 @@ const getPaginationValues = (obj) => {
 }
 
 const getPaginationValues2 = (obj) => {
-	let { start = 0, limit = 10, sort = 'dCreatedAt', order, search } = obj
+	let { start = 0, limit = 10, sort = 'createdAt', order, search } = obj
 	const orderBy = order && order === 'asc' ? 1 : -1
 
 	const sorting = { [sort]: orderBy }

@@ -5,8 +5,10 @@ module.exports = (app) => {
 		require('../models-routes-services/teachers/routes'),
 		require('../models-routes-services/students/routes'),
 		require('../models-routes-services/teachers/permissions/routes'),
-		require('../models-routes-services/teachers/roles/routes')
-
+		require('../models-routes-services/teachers/roles/routes'),
+		require('../models-routes-services/class/routes'),
+		require('../models-routes-services/attendanceLogs/routes'),		
+		require('../models-routes-services/cron/routes')
 		// require('../models-routes-services/course/routes'),
 		// require('../models-routes-services/admin/routes')
 	])

@@ -10,9 +10,6 @@ module.exports = {
   action_success: '## successful.',
   cancel_success: '## cancel successful.',
   sent_success: '## sent successfully.',
-  not_allow: 'You\'re not allowed to update bank details',
-  cBackgroundProcess: '## Background process started',
-  win_dist_exist: 'Win prize already distributed',
 
   action_failure: '## failed.',
   generate_success: '## generated successfully.',
@@ -48,16 +45,26 @@ module.exports = {
   presigned_succ: 'Pre-signed URL generated successfully.',
   must_alpha_num: 'Username allows alphanumeric characters only.',
   auth_failed: 'Please enter a valid credentials.',
-  social_auth_failed: 'Please enter a valid social credentials.',
   err_resend_otp: 'You can resend OTP only after ## seconds.',
   old_new_field_same: 'Old and New ## can\'t be same.',
   wrong_old_field: 'Please enter a correct old field.',
   user_forgot_err: 'We didn\'t find any account in our system. Please check your input first.',
-  OTP_sent_succ: 'OTP sent successfully.',
   verify_otp_err: 'Entered OTP is invalid or expired.',
   verification_success: 'Verification done successfully.',
   deleted_user: 'Deleted User',
-  promo_usage_limit: 'You have reached usage limit for this promocode.',
   is_not_active: '## is not active.',
-  is_active: '## is active.'
+  is_active: '## is active.',
+  
+  access_denied: 'You don\'t have permission',
+
+  complaints_already_declined: 'Your complaints is already declined.',
+  complaints_already_resolved: 'Your complaints is already resolved.',
+  complaints_already_inprogress: 'Your complaints is already inprogress.',
+
+
+  read_access_denied: 'You don\'t have read permission for ##',
+  write_access_denied: 'You don\'t have write permission for ##',
+
+  limit_reached: 'You have reached a limit for sending ##. Please try after some time.',
+  declined_comment: 'Please enter a declined reason.'
 }

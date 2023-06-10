@@ -1,14 +1,14 @@
 
 const router = require('express').Router()
-const studentController = require('./controller')
+const attendanceController = require('./controller')
 const validators = require('./validators')
-const { validate, validateTeacher } = require('../../middlewares/middleware')
+const {  validateTeacher } = require('../../middlewares/middleware')
 
-router.post('/student/login/v1', validators.login, validate, studentController.login)
-router.get('/student/:id/v1', validators.getStudent, validate, studentController.getSingeleStudent)
-router.get('/student/list/v1', validate, studentController.list)
+router.post('/teacher/attendance/v1', validators.addAttendance,  validateTeacher('ATTENDANCE','W'), attendanceController.addAttendance)
+router.put('/teacher/attendance/:id/v1', validators.updateAttendance,  validateTeacher('ATTENDANCE','W'), attendanceController.updateAttendance)
 
-router.post('/teacher/student/v1',validators.addStudent, validateTeacher('STUDENT','W'), studentController.addStudent)
+router.get('/teacher/attendance/:id/v1', validateTeacher('ATTENDANCE','R'), attendanceController.getSingleDayAttendance )
+router.get('/teacher/attendance/v1', validateTeacher('ATTENDANCE','R'), attendanceController.list )
 
 
 module.exports = router

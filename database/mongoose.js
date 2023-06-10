@@ -12,7 +12,7 @@ async function connection(DB_URL, maxPoolSize = 10, DB) {
 		console.log('err', error)
 	}
 }
-
+mongoose.set('debug', true)
 module.exports = (app) =>{ 
 	connection(config.DB_URL, 10, 'Student management').then(() => {
 	app.listen(config.PORT, () => {

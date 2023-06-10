@@ -10,5 +10,11 @@ module.exports = {
   checkUser: 'User exist checked',
   student: 'Student',
   students: 'Students',
-  teacher: 'Teacher'
+  teacher: 'Teacher',
+  Attendance: 'Attendance',
+  class: 'Class',
+  role: 'Role',
+  roles: 'Roles',
+  classes:'Classes',
+  attedancRecords: 'Attendance Records'
 }

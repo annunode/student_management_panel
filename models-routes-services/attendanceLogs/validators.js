@@ -1,20 +1,15 @@
-const { body, param } = require('express-validator')
+const { body } = require('express-validator')
 
-const login = [
-	body('login').not().isEmpty(),
-	body('password').not().isEmpty()
+const addAttendance = [
+	body('classId').not().isEmpty().isMongoId(),
+	body('aStudentAttendance').not().isEmpty().isArray()
 ]
 
-const getStudent = [
-	param('id').not().isEmpty().isMongoId()
+const updateAttendance = [
+	body('aStudentAttendance').not().isEmpty().isArray()
 ]
 
-const addStudent = [
-	
-]
-  
 module.exports = {
-	login,
-	getStudent,
-	addStudent
+	addAttendance,
+	updateAttendance
 }

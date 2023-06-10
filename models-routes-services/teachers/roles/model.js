@@ -10,7 +10,7 @@ const Roles = new Schema({
   }],
   eStatus: { type: String, enum: status, default: 'Y' },
   sExternalId: { type: String }
-}, { timestamps: { createdAt: 'dCreatedAt', updatedAt: 'dUpdatedAt' } })
+}, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
 Roles.index({ 'aPermissions.sKey': 1 })
 Roles.index({ eStatus: 1 })

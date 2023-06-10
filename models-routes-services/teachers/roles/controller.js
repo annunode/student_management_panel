@@ -13,6 +13,7 @@ class Role {
       const eKeyArray = aPermissions.map(({ sKey }) => sKey)
 
       const permissions = await PermissionsModel.find({ eStatus: 'Y' }, { sKey: 1, _id: 0 }).lean()
+      console.log(permissions)
       if (!permissions.length) return res.status(status.NotFound).jsonp({ status: jsonStatus.NotFound, message: messages[req.userLanguage].not_exist.replace('##', messages[req.userLanguage].permission) })
 
       //  We'll check that all permission includes in our db are exist inside given role permission.

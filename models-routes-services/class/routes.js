@@ -2,11 +2,11 @@
 const router = require('express').Router()
 const classController = require('./controller')
 const validators = require('./validators')
-const { validate } = require('../../middlewares/middleware')
+const { validateTeacher } = require('../../middlewares/middleware')
 
-router.post('/class/v1', validate, classController.addClass)
-router.get('/class/:id/v1', validate, classController.getSingeleclass)
-router.get('/class/list/v1', validate, classController.list)
+router.post('/teacher/class/v1', validators.addClass, validateTeacher('CLASS','W'), classController.addClass)
+router.get('/teacher/class/:id/v1',validators.getClass, validateTeacher('CLASS','R'), classController.getClass)
+router.get('/teacher/class/list/v1',  validateTeacher('CLASS','R'), classController.list)
 
 
 module.exports = router

@@ -2,6 +2,7 @@
 const mongoose = require('mongoose')
 const config = require('../../config/config')
 const jwt = require('jsonwebtoken')
+const RolesModel = require('./roles/model')
 
 const teacherSchema = new mongoose.Schema({
 	name: {
@@ -34,13 +35,14 @@ const teacherSchema = new mongoose.Schema({
 		sToken: { type: String },
 		dTimeStamp: { type: Date, default: Date.now }
 	}],
-})
+	iRoleId: { type: mongoose.Types.ObjectId , ref:RolesModel, required: true}
+},{ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
 teacherSchema.statics.filterData = function (teacher) {
 	teacher.__v = undefined
 	teacher.aJwtTokens = undefined
 	teacher.password = undefined
-	teacher.dUpdatedAt = undefined
+	teacher.updatedAt = undefined
 	return teacher
 }
 teacherSchema.statics.findByToken = function (token) {
