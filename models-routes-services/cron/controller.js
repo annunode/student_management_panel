@@ -6,7 +6,7 @@ class cronController {
 
 	async updateAttendance(req,res) {
 		try{
-           
+           console.log('Updated for today', new Date())
             const date1 = moment()
             const today = date1.format('YYYY-MM-DD')
             const tomorrow = date1.add(1,'days').format('YYYY-MM-DD')
