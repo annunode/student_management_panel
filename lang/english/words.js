@@ -18,5 +18,6 @@ module.exports = {
   classes:'Classes',
   attedancRecords: 'Attendance Records',
   homework: 'Homework',
-  comments: 'Comments'
+  comments: 'Comments',
+  notice: 'Notice'
 }

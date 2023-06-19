@@ -10,7 +10,8 @@ module.exports = (app) => {
 		require('../models-routes-services/attendanceLogs/routes'),		
 		require('../models-routes-services/cron/routes'),
 		require('../models-routes-services/homework/routes'),
-		require('../models-routes-services/homework/comments/routes')
+		require('../models-routes-services/homework/comments/routes'),
+		require('../models-routes-services/notice/routes')
 		// require('../models-routes-services/course/routes'),
 		// require('../models-routes-services/admin/routes')
 	])
