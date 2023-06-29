@@ -1,4 +1,4 @@
-const { body, param } = require('express-validator')
+const { body, param, query } = require('express-validator')
 const { noticeTypes } = require('../../data')
 const ObjectId = require('mongoose').Types.ObjectId
 
@@ -45,8 +45,19 @@ const get = [
 ]
 
 const list = [
-	param('classId').not().isEmpty().isMongoId()
-]
+	query('classId').custom((value, { req }) => {
+		if (req.query.type === 'CLASS' && (!value || !ObjectId.isValid(value)) && req?.student?.id) {
+			throw new Error()
+		}
+
+		return true
+	}),
+	query('studentId').custom((value, { req }) => {
+		if (req.query.type === 'PERSONAL' && (!value || !ObjectId.isValid(value)) && req?.student?.id) {
+			throw new Error()
+		}
+		return true
+})]
   
   
 module.exports = {

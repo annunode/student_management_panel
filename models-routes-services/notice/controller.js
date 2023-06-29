@@ -4,28 +4,43 @@ const { catchError, getPaginationValues, pick } = require('../../helper/utilitie
 const ClassModel = require('../class/model')
 const StudentsModel = require('../students/model')
 
-class noticeController {
-	async list(req,res) {
+class noticeController{
+async list(req,res) {
 		try{
 			const { start, limit, sorting } = getPaginationValues(req.query)
-			const data = await NoticeModel.find({classId: req.params.classId }).skip(start).limit(limit).sort(sorting).lean()
-            const total = await NoticeModel.countDocuments({classId: req.params.classId })
+			const { type, classId, studentId } = req.query
+			let query = { type }
 
-			const aHomeWorkId = data.map(item=>item._id)
-			const comments = await commentsModel.find({homeworkId:{ $in: aHomeWorkId }}).lean()
+			const loggedInStudent = req?.student?.id
+			let student 
+			if(loggedInStudent)  student = await StudentsModel.findOne({_id:loggedInStudent},{ iClassId: 1 }).lean()
+			if (type==='CLASS'){ 
+						if(student && student.classId.toString()!==classId.toString()){
+					return res.status(status.BadRequest).jsonp({
+					status: jsonStatus.BadRequest,
+					message: messages[req.userLanguage].not_found.replace('##',  messages[req.userLanguage].notice)
+				})}
+				query.classId = classId
 
-			let results 
-			if(comments.length){
-			results = data.map(homework=>{
-				const hwComments = comments[comments.findIndex(item=>item.homeworkId.toString()===homework._id.toString())]
-				return { ...homework, hwComments }
-			})}else{
-				results = data
 			}
+
+			if (type==='PERSONAL') {
+				if(student && student._id.toString()!==studentId.toString()){
+					return res.status(status.BadRequest).jsonp({
+					status: jsonStatus.BadRequest,
+					message: messages[req.userLanguage].not_found.replace('##',  messages[req.userLanguage].notice)
+				})}
+				query.studentId = studentId
+			}
+
+console.log(start, limit,sorting)
+			const data = await NoticeModel.find(query).skip(start).limit(limit).sort(sorting).lean()
+            const total = await NoticeModel.countDocuments(query)
+
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
 				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].notice),
-				results,
+				data,
                 total
 			})
 
@@ -39,8 +54,6 @@ class noticeController {
 			const data = await NoticeModel.findOne({_id: req.params.id}).lean()
 			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].Student),
 		})
-		const comments = await commentsModel.find({homeworkId: data._id}).lean()
-		if(comments.length) data.comments = comments
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
 				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].notice),
