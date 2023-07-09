@@ -57,9 +57,9 @@ const validateAdmin = (sKey, eType) => {
 
 				return next(null, null)
 			} else {
-				if (!req.admin.iRoleId) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
+				if (!req.admin.roleId) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
 
-				const role = await RolesModel.findOne({ _id: ObjectId(req.admin.iRoleId), eStatus: 'Y' }, { aPermissions: 1 }).lean()
+				const role = await RolesModel.findOne({ _id: ObjectId(req.admin.roleId), eStatus: 'Y' }, { aPermissions: 1 }).lean()
 				if (!role) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
 
 				const hasPermission = role.aPermissions.find((permission) => {
@@ -159,9 +159,9 @@ const validateTeacher = (sKey, eType) => {
 
 				return next(null, null)
 			} else {
-				if (!req.teacher.iRoleId) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
+				if (!req.teacher.roleId) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
 
-				const role = await RolesModel.findOne({ _id: ObjectId(req.teacher.iRoleId), eStatus: 'Y' }, { aPermissions: 1 }).lean()
+				const role = await RolesModel.findOne({ _id: ObjectId(req.teacher.roleId), eStatus: 'Y' }, { aPermissions: 1 }).lean()
 				if (!role) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
 
 				const hasPermission = role.aPermissions.find((permission) => {

@@ -16,7 +16,6 @@ const teacherSchema = new mongoose.Schema({
 	},
 	email: {
 		type: String,
-		required: true,
 		unique: true
 	},
 	phoneNumber: {
@@ -35,7 +34,7 @@ const teacherSchema = new mongoose.Schema({
 		sToken: { type: String },
 		dTimeStamp: { type: Date, default: Date.now }
 	}],
-	iRoleId: { type: mongoose.Types.ObjectId , ref:RolesModel, required: true}
+	roleId: { type: mongoose.Types.ObjectId , ref:RolesModel, required: true}
 },{ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
 teacherSchema.statics.filterData = function (teacher) {

@@ -164,9 +164,6 @@ const defaultSearch = (val) => {
 	}
 }
 
-const isValidSportsType = (val) => {
-	return data.category.find((type) => type === val.toUpperCase())
-}
 
 const getPaginationValues = (obj) => {
 	let { start = 0, limit = 10, sort = 'createdAt', order, search } = obj
@@ -190,11 +187,6 @@ const getPaginationValues2 = (obj) => {
 	const sorting = { [sort]: orderBy }
 	if (search) search = defaultSearch(search)
 	return { start, limit, sorting, search }
-}
-
-const getStatisticsSportsKey = (categoryName) => {
-	if (!data.category.includes(categoryName)) return ''
-	return `o${categoryName.charAt(0).toUpperCase()}${categoryName.slice(1).toLowerCase()}`
 }
 
 const isUrl = (s) => {
@@ -458,38 +450,7 @@ function searchValues(search) {
 	}
 	return userQuery
 }
-const getMatchLeagueStatus = async (matchLeague, uniqueUserJoinCount) => {
-	const { nMax, nMin, nJoined, bPoolPrize, bConfirmLeague, bPrivateLeague } = matchLeague
 
-	if (bPrivateLeague) {
-		if (bPoolPrize) {
-			if (uniqueUserJoinCount < 2) {
-				return 'PLAY_RETURN'
-			} else {
-				return 'LIVE'
-			}
-		} else {
-			if (uniqueUserJoinCount >= 2 && nJoined >= nMax) {
-				return 'LIVE'
-			} else {
-				return 'PLAY_RETURN'
-			}
-		}
-	} else {
-		if (bConfirmLeague || bPoolPrize) {
-			if (uniqueUserJoinCount < 2 || nMin > nJoined) {
-				return 'PLAY_RETURN'
-			}
-			return 'LIVE'
-		} else {
-			if (uniqueUserJoinCount < 2 || nJoined < nMax) {
-				return 'PLAY_RETURN'
-			} else {
-				return 'LIVE'
-			}
-		}
-	}
-}
 
 /**
  *

@@ -51,13 +51,14 @@ const studentSchema = new mongoose.Schema({
 		type: String,
 		default: 'Y'
 	},
-	classId: [
+	classId: 
 		{
 			type: mongoose.Types.ObjectId,
 			ref: ClassModel,
 			required: true
 		}
-	]
+	,
+	rollNo:{ type:String, required:true}
 },{ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
 studentSchema.statics.filterData = function (student) {

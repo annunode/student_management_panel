@@ -14,7 +14,7 @@ async list(req,res) {
 			const loggedInStudent = req?.student?.id
 			let student 
 			if(loggedInStudent)  student = await StudentsModel.findOne({_id:loggedInStudent},{ iClassId: 1 }).lean()
-			if (type==='CLASS'){ 
+			if (type==='CLASS' && loggedInStudent){ 
 						if(student && student.classId.toString()!==classId.toString()){
 					return res.status(status.BadRequest).jsonp({
 					status: jsonStatus.BadRequest,
@@ -24,7 +24,7 @@ async list(req,res) {
 
 			}
 
-			if (type==='PERSONAL') {
+			if (type==='PERSONAL' && loggedInStudent) {
 				if(student && student._id.toString()!==studentId.toString()){
 					return res.status(status.BadRequest).jsonp({
 					status: jsonStatus.BadRequest,
@@ -52,7 +52,7 @@ console.log(start, limit,sorting)
 	async get(req,res) {
 		try{
 			const data = await NoticeModel.findOne({_id: req.params.id}).lean()
-			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].Student),
+			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].notice),
 		})
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
@@ -78,7 +78,7 @@ console.log(start, limit,sorting)
 
 			if (req.body.studentId){
 				const student = await StudentsModel.findById(studentId, { _id: 1 } ).lean()
-				if(!student) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].student)})
+				if(!student) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].notice)})
 				}
             req.body = pick(req.body, ['title', 'description', 'classId', 'subject', 'studentId', 'type'])
 
@@ -110,7 +110,7 @@ console.log(start, limit,sorting)
 
 			if (req.body.studentId){
 				const student = await StudentsModel.findById(studentId, { _id: 1 } ).lean()
-				if(!student) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].student)})
+				if(!student) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].notice)})
 				}
 				req.body = pick(req.body, ['title', 'description', 'classId', 'subject', 'studentId', 'type'])
 

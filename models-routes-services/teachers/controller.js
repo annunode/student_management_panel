@@ -2,9 +2,12 @@ const jwt = require('jsonwebtoken')
 // const bcrypt = require('bcryptjs')
 const TeachersModel = require('../teachers/model')
 const { messages, status, jsonStatus } = require('../../helper/api.responses')
-const { removenull, catchError, pick} = require('../../helper/utilities.services')
+const { removenull, catchError, pick, getPaginationValues} = require('../../helper/utilities.services')
 const config = require('../../config/config')
-const { username } = require('../../lang/english/words')
+const RolesModel = require('./roles/model')
+const ClassModel = require('../class/model')
+const StudentsModel = require('../students/model')
+const ObjectId = require('mongoose').Types.ObjectId
 
 class TeacherAuth {
 	async login(req, res) {
@@ -43,12 +46,7 @@ class TeacherAuth {
   
 			// teacher can login in LOGIN_HARD_LIMIT_teacher time.
 			// for e.g. LOGIN_HARD_LIMIT_teacher=5 -> teacher can login only for 5 times, After that we'll remove first login token from db.
-			if (teacher.aJwtTokens.length < config.LOGIN_HARD_LIMIT_teacher || config.LOGIN_HARD_LIMIT_teacher === 0) {
-				teacher.aJwtTokens.push(newToken)
-			} else {
-				teacher.aJwtTokens.splice(0, 1)
-				teacher.aJwtTokens.push(newToken)
-			}
+	
   
 			teacher.dLoginAt = new Date()
 			await teacher.save()
@@ -65,6 +63,103 @@ class TeacherAuth {
 			return catchError('teacherAuth.login', error, req, res)
 		}
 	}
-}
 
+async list(req,res) {
+		try{
+			const { start, limit, sorting } = getPaginationValues(req.query)
+			let query = { status: 'Y' }
+
+			const loggedInStudent = req?.student?.id			
+
+			const data = await TeachersModel.find(query).skip(start).limit(limit).sort(sorting).lean()
+            const total = await TeachersModel.countDocuments(query)
+
+			const filterData = data.map(item=>TeachersModel.filterData(item))
+			return res.status(status.OK).jsonp({
+				status: jsonStatus.OK,
+				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].teacher),
+				data:filterData,
+                total
+			})
+
+		}catch(error){
+			return catchError('TeacherAuth.list', error, req,res)
+		}
+	}
+
+	async get(req,res) {
+		try{
+			const data = await TeachersModel.findOne({_id: req.params.id}).lean()
+			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher),
+		})
+		TeachersModel.filterData(data)
+			return res.status(status.OK).jsonp({
+				status: jsonStatus.OK,
+				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].teacher),
+				data
+			})
+			
+		}catch(error){
+			return catchError('TeacherAuth.getClass', error, req,res)
+		}
+	}
+
+    async add(req,res) {
+		try{
+			const adminId = req?.admin?._id ? req?.admin?._id : ''
+			const teacherId = req?.teacher?._id ? req?.teacher?._id : ''
+			const { roleId, username, email } = req.body
+
+			const userExist = await TeachersModel.findOne({$or:[{ username },{ email }]}, { _id: 1}).lean()
+			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.teacher)})
+			
+			const role = await RolesModel.findOne({_id:roleId, status: 'Y'}).lean()
+			if(!role) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.invalid.replace('##', messages.English.role)})
+			
+
+
+            req.body = pick(req.body, ['name', 'username', 'email', 'phoneNumber', 'password', 'status', 'roleId'])
+
+			const data = await TeachersModel.create({...req.body, teacherId, adminId})
+			return res.status(status.OK).jsonp({
+				status: jsonStatus.OK,
+				message: messages[req.userLanguage].add_success.replace('##',  messages[req.userLanguage].teacher),
+				data
+			})
+			
+		}catch(error){
+			return catchError('TeacherAuth.add', error, req,res)
+		}
+	}
+	async update(req,res) {
+		try{
+			
+			const teacher  = await TeachersModel.findById(req.params.id, { id: 1 }).lean()
+			if(!teacher) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].teacher)})
+			
+			const { username, email, roleId } = req.body
+			const userExist = await TeachersModel.findOne({_id: { $ne: req.params.id } ,$or:[{ username },{ email }]}, { _id: 1}).lean()
+			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.teacher)})
+			
+			if(req.body.roleId){
+			const role = await RolesModel.findOne({_id:roleId, status: 'Y'}).lean()
+			if(!role) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.invalid.replace('##', messages.English.role)})
+			}
+
+			req.body = pick(req.body, ['name', 'username', 'email', 'phoneNumber', 'status', 'roleId'])
+
+			//add validation for same teacher add update
+			await TeachersModel.updateOne({ _id: ObjectId(req.params.id) },{...req.body })
+			return res.status(status.OK).jsonp({
+				status: jsonStatus.OK,
+				message: messages[req.userLanguage].update_success.replace('##',  messages[req.userLanguage].teacher)})
+			
+		}catch(error){
+			return catchError('TeacherAuth.update', error, req,res)
+		}
+	}
+
+
+
+}
 module.exports = new TeacherAuth()

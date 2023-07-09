@@ -6,6 +6,7 @@ const { removenull, catchError, pick, getPaginationValues} = require('../../help
 const config = require('../../config/config')
 // const TeachersModel = require('../teachers/model')
 const ClassModel = require('../class/model')
+const TeacherModel = require('../teachers/model')
 
 class StudentAuth {
 	async login(req, res) {
@@ -67,7 +68,7 @@ class StudentAuth {
 			const data = await StudentsModel.find().skip(start).limit(limit).sort(sorting).lean()
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
-				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].Students),
+				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].students),
 				data
 			})
 
@@ -76,14 +77,14 @@ class StudentAuth {
 		}
 	}
 
-	async getSingeleStudent(req,res) {
+	async getSingleStudent(req,res) {
 		try{
 			const data = await StudentsModel.findOne({_id: req.params.id}).lean()
 			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].Student),
 			})
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
-				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].Students),
+				message: messages[req.userLanguage].success.replace('##',  messages[req.userLanguage].student),
 				data
 			})
 			
@@ -93,16 +94,19 @@ class StudentAuth {
 	}
 	async addStudent(req,res) {
 		try{
-			const { classId } = req.body
-			req.body = pick(req.body, ['classId','firstName','lastName','dateOfBirth','gender','email','phoneNumber','username','address','status'])
+			const { classId, username, email, phoneNumber } = req.body
+			req.body = pick(req.body, ['classId','firstName','lastName','dateOfBirth','gender','email','phoneNumber','username','address','status','password','rollNo'])
 
 			const classes = ClassModel.findOne({_id: classId, status: 'Y' }, { _id: 1 }).lean()
-			if(!classes) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher) })
-
+			if(!classes) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].class) })
+			
+			const userExist = await StudentsModel.findOne({$or:[{ username },{ email }, { phoneNumber }]}, { _id: 1}).lean()
+			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.teacher)})
+			
 			const data = await StudentsModel.create({...req.body})
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
-				message: messages[req.userLanguage].add_success.replace('##',  messages[req.userLanguage].Class),
+				message: messages[req.userLanguage].add_success.replace('##',  messages[req.userLanguage].student),
 				data
 			})
 			
@@ -112,16 +116,19 @@ class StudentAuth {
 	}
 	async updateStudent(req,res) {
 		try{
-			const { classId } = req.body
-			req.body = pick(req.body, ['classId','firstName','lastName','dateOfBirth','gender','email','phoneNumber','username','address','status'])
+			const { classId, username, email, phoneNumber } = req.body
+			req.body = pick(req.body, ['classId','firstName','lastName','gender','email','phoneNumber','address','status','rollNo'])
 
 			const classes = ClassModel.findOne({_id: classId, status: 'Y' }, { _id: 1 }).lean()
 			if(!classes) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher) })
 
+			const userExist = await StudentsModel.findOne({_id: {$ne: req.params.id }, $or:[{ username },{ email }, { phoneNumber }]}, { _id: 1}).lean()
+			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.teacher)})
+			
 			await StudentsModel.updateOne({_id: req.params.id }, {...req.body})
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
-				message: messages[req.userLanguage].update_success.replace('##',  messages[req.userLanguage].Class),
+				message: messages[req.userLanguage].update_success.replace('##',  messages[req.userLanguage].student),
 			})
 			
 		}catch(error){
