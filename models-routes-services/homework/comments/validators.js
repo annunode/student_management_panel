@@ -2,14 +2,14 @@ const { body, param } = require('express-validator')
 
 const addComent = [
 	body('comment').not().isEmpty().isString(),
-	body('homeworkId').not().optional().isMongoId(),
+	body('homeworkId').optional()
 ]
 const updateComment = [
 	body('comment').optional().isString(),
 ]
 
 const list = [
-	body('homeworkId').not().optional().isMongoId()
+	body('homeworkId').optional()
 ]
 const getComment = [
 	param('id').not().isEmpty().isMongoId()
