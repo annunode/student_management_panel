@@ -557,5 +557,8 @@ module.exports = {
 	catchError,
 	handleCatchError,
 	pick,
-	getPaginationValues
+	getPaginationValues,
+	checkAlphanumeric, 
+	getIp, 
+	validateMobile 
 }

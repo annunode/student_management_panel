@@ -1,0 +1,30 @@
+const { body } = require('express-validator')
+const data = require('../../data')
+
+const login = [
+  body('login').not().isEmpty(),
+  body('password').not().isEmpty().optional()
+]
+
+const createSubAdmin = [
+  body('name').not().isEmpty(),
+  body('username').not().isEmpty(),
+  body('email').isEmail().not().isEmpty().escape(),
+  body('phoneNumber').not().isEmpty(),
+  body('password').not().isEmpty(),
+  body('roleId').not().isEmpty(),
+  body('type').not().isEmpty().isIn(data.adminTypes)
+]
+const updateSubAdminV2 = [
+  body('sName').not().isEmpty(),
+  body('sUsername').not().isEmpty(),
+  body('sEmail').isEmail().escape(),
+  body('sMobNum').not().isEmpty(),
+  body('iRoleId').not().isEmpty()
+]
+
+module.exports = {
+  createSubAdmin,
+  login,
+  updateSubAdminV2
+}

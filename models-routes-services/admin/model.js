@@ -1,18 +1,18 @@
 const mongoose = require('mongoose')
 const RolesModel = require('../teachers/roles/model')
+const config = require('../../config/config')
+const jwt = require('jsonwebtoken')
+
+const data = require('../../data')
+
 
 const adminSchema = new mongoose.Schema({
-	firstName: {
-		type: String,
-		required: true
-	},
-	lastName: {
+	name: {
 		type: String,
 		required: true
 	},
 	email: {
 		type: String,
-		required: true,
 		unique: true
 	},
 	phoneNumber: {
@@ -20,8 +20,7 @@ const adminSchema = new mongoose.Schema({
 		required: true
 	},
 	address: {
-		type: String,
-		required: true
+		type: String
 	},
 	password: {
 		type: String,
@@ -40,9 +39,30 @@ const adminSchema = new mongoose.Schema({
 		sToken: { type: String },
 		dTimeStamp: { type: Date, default: Date.now }
 	}],
-	iRoleId: { type: mongoose.Types.ObjectId , ref:RolesModel, required: true}
-},{ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
+	type: {
+		type: String,
+		enum: data.adminTypes,
+		required: true
+	},
+	roleId: { type: mongoose.Types.ObjectId , ref:RolesModel, required: true}
+}, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
-const Admin = mongoose.model('Admin', adminSchema)
+adminSchema.statics.findByToken = function (token) {
+	const admin = this
+	let decoded
+	try {
+	decoded = jwt.verify(token, config.JWT_SECRET)
+	} catch (e) {
+	return Promise.reject(e)
+	}
+	const query = {
+  _id: decoded._id,
+	'aJwtTokens.sToken': token,
+	eStatus: 'Y'
+	}
+	return admin.findOne(query)
+  }
+
+const Admin = mongoose.model('admins', adminSchema)
 
 module.exports = Admin

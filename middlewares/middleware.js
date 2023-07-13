@@ -46,7 +46,7 @@ const validateAdmin = (sKey, eType) => {
 			req.admin = admin
 
 			let errors
-			if (req.admin.eType === 'SUPER') {
+			if (req.admin.type === 'SUPER') {
 				errors = validationResult(req)
 				if (!errors.isEmpty()) {
 					return res.status(status.UnprocessableEntity).jsonp({
@@ -148,7 +148,7 @@ const validateTeacher = (sKey, eType) => {
 			req.teacher = teacher
 
 			let errors
-			if (req.teacher.eType === 'SUPER') {
+			if (req.teacher.type === 'SUPER') {
 				errors = validationResult(req)
 				if (!errors.isEmpty()) {
 					return res.status(status.UnprocessableEntity).jsonp({

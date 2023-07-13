@@ -1,10 +1,17 @@
 const router = require('express').Router()
-const AdminCo = require('./services')
+const adminController = require('./controller')
 const validators = require('./validators')
-const { validateAdmin, validate, isAdminAuthenticated, decrypt } = require('../../../middlewares/middleware')
+const { validateAdmin, validate, isAdminAuthenticated, decrypt } = require('../../middlewares/middleware')
 
-router.post('/admin/auth/login/v1', validators.adminLogin, validate, AdminCo.login)
+router.post('/admin/login/v1', validators.login, validate, adminController.login)
 
-router.post('/admin/auth/sub-admin/v3', validators.createSubAdminV3, validateAdmin('SUBADMIN', 'W'), decrypt, AdminCo.createSubAdminV3)
+router.post('/admin/sub-admin/v1', validators.createSubAdmin, validateAdmin('SUBADMIN', 'W'), decrypt, adminController.createSubAdmin)
+router.put('/admin/sub-admin/:id/v3', validators.updateSubAdminV2, validateAdmin('SUBADMIN', 'W'), decrypt, adminController.update)
 
-router.put('/admin/auth/logout/v1', isAdminAuthenticated, AdminCo.logout)
+router.get('/admin/sub-admin/list/v1', validateAdmin('SUBADMIN', 'R'), adminController.list)
+router.get('/admin/sub-admin/:id/v1', validateAdmin('SUBADMIN', 'R'), adminController.get)
+
+router.put('/admin/logout/v1', isAdminAuthenticated, adminController.logout)
+
+
+module.exports = router
