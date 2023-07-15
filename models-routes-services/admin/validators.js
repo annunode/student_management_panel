@@ -3,7 +3,7 @@ const data = require('../../data')
 
 const login = [
   body('login').not().isEmpty(),
-  body('password').not().isEmpty().optional()
+  body('password').not().isEmpty()
 ]
 
 const createSubAdmin = [

@@ -17,7 +17,7 @@ class AdminAuth {
 
       login = login.toLowerCase().trim()
 
-      let admin = await AdminsModel.findOne({ $or: [{ email: login }, { phoneNumber: login }], status: 'Y' }).populate({ path: 'roleId' })
+      let admin = await AdminsModel.findOne({ $or: [{ email: login }, { phoneNumber: login }, {username: login}], status: 'Y' }).populate({ path: 'roleId' })
 
       if (!admin) {
         return res.status(status.NotFound).jsonp({

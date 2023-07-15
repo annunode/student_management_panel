@@ -2,10 +2,10 @@
 const router = require('express').Router()
 const studentController = require('./controller')
 const validators = require('./validators')
-const { validate, validateTeacher, validateAdmin } = require('../../middlewares/middleware')
+const { validate, validateTeacher, validateAdmin, isStudentAuthenticated } = require('../../middlewares/middleware')
 
 router.post('/student/login/v1', validators.login, validate, studentController.login)
-router.get('/student/:id/v1', validators.getStudent, validate, studentController.getSingleStudent)
+router.get('/student-profile/v1',  isStudentAuthenticated, studentController.getSingleStudent)
 router.get('/student/list/v1', validate, studentController.list)
 
 router.post('/teacher/student/v1',validators.addStudent, validateTeacher('STUDENT','W'), studentController.addStudent)

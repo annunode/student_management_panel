@@ -79,8 +79,11 @@ class StudentAuth {
 
 	async getSingleStudent(req,res) {
 		try{
-			const data = await StudentsModel.findOne({_id: req.params.id}).lean()
-			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].Student),
+			const query = {}
+			query._id = req?.params?.id ? req.params.id : req?.student?.id
+
+			const data = await StudentsModel.findOne(query).lean()
+			if(!data) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].student),
 			})
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
