@@ -98,13 +98,13 @@ class StudentAuth {
 	async addStudent(req,res) {
 		try{
 			const { classId, username, email, phoneNumber } = req.body
-			req.body = pick(req.body, ['classId','firstName','lastName','dateOfBirth','gender','email','phoneNumber','username','address','status','password','rollNo'])
+			req.body = pick(req.body, ['classId','firstName','lastName','dateOfBirth','gender','email','phoneNumber','username','address','status','password','rollNo', 'grNo', 'motherName', 'fatherName'])
 
 			const classes = ClassModel.findOne({_id: classId, status: 'Y' }, { _id: 1 }).lean()
 			if(!classes) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].class) })
 			
 			const userExist = await StudentsModel.findOne({$or:[{ username },{ email }, { phoneNumber }]}, { _id: 1}).lean()
-			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.teacher)})
+			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.student)})
 			
 			const data = await StudentsModel.create({...req.body})
 			return res.status(status.OK).jsonp({
@@ -120,13 +120,13 @@ class StudentAuth {
 	async updateStudent(req,res) {
 		try{
 			const { classId, username, email, phoneNumber } = req.body
-			req.body = pick(req.body, ['classId','firstName','lastName','gender','email','phoneNumber','address','status','rollNo'])
+			req.body = pick(req.body, ['classId','firstName','lastName','gender','email','phoneNumber','address','status','rollNo', 'grNo', 'motherName', 'fatherName'])
 
 			const classes = ClassModel.findOne({_id: classId, status: 'Y' }, { _id: 1 }).lean()
-			if(!classes) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].teacher) })
+			if(!classes) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest,  message: messages[req.userLanguage].not_exist.replace('##',  messages[req.userLanguage].student) })
 
 			const userExist = await StudentsModel.findOne({_id: {$ne: req.params.id }, $or:[{ username },{ email }, { phoneNumber }]}, { _id: 1}).lean()
-			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.teacher)})
+			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.student)})
 			
 			await StudentsModel.updateOne({_id: req.params.id }, {...req.body})
 			return res.status(status.OK).jsonp({
