@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const ClassModel = require('../class/model')
 const TeacherModel = require('../teachers/model')
 const StudentsModel = require('../students/model')
+const AdminModel = require('../admin/model')
 const { noticeTypes } = require('../../data')
 
 const notice = new mongoose.Schema({
@@ -20,13 +21,17 @@ const notice = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: ClassModel  
     },
-    studentId:{
+    teacherId:{
         type: mongoose.Types.ObjectId,
         ref: TeacherModel  
     },
-    teacherId:{
+    studentId:{
         type: mongoose.Types.ObjectId,
         ref: StudentsModel  
+    },
+    adminId:{
+        type: mongoose.Types.ObjectId,
+        ref: AdminModel  
     },
     type:{
         type: String,

@@ -59,10 +59,6 @@ class commentsController {
 	async updateComment(req,res) {
 		try{
             req.body = pick(req.body, ['comment'])
-			// const oldComment = await CommentModel.updateOne({_id:req.params.id},{...req.body})
-			// add validation for whether or not the user or teacher addedthe same comment as updating same in deletion
-	
-
 
 			await CommentModel.updateOne({_id:req.params.id},{...req.body})
 			return res.status(status.OK).jsonp({

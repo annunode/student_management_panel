@@ -3,6 +3,8 @@ const { messages, status, jsonStatus } = require('../../helper/api.responses')
 const { catchError, getPaginationValues, pick } = require('../../helper/utilities.services')
 const ClassModel = require('../class/model')
 const StudentsModel = require('../students/model')
+const TeacherModel = require('../teachers/model')
+const AdminModel = require('../admin/model')
 
 class noticeController{
 async list(req,res) {
@@ -33,7 +35,6 @@ async list(req,res) {
 				query.studentId = studentId
 			}
 
-console.log(start, limit,sorting)
 			const data = await NoticeModel.find(query).skip(start).limit(limit).sort(sorting).lean()
             const total = await NoticeModel.countDocuments(query)
 
@@ -71,6 +72,8 @@ console.log(start, limit,sorting)
 			const teacherId = req?.teacher?._id ? req?.teacher?._id : ''
 			const { classId ='' , studentId =''} = req.body
 
+
+
 			if (req.body.classId){
 			const oClass = await ClassModel.findById(classId, {_id: 1 } ).lean()
 			if(!oClass) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].class)})
@@ -80,9 +83,27 @@ console.log(start, limit,sorting)
 				const student = await StudentsModel.findById(studentId, { _id: 1 } ).lean()
 				if(!student) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].notice)})
 				}
-            req.body = pick(req.body, ['title', 'description', 'classId', 'subject', 'studentId', 'type'])
+            
+				req.body = pick(req.body, ['title', 'description', 'classId', 'subject', 'studentId', 'type'])
+			
+			if (adminId){
+				
+				const admin = await AdminModel.findOne({_id: adminId },{ _id: 1}).lean()
+				if(!admin) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].admin)})
+				
+				req.body.adminId = adminId
+		}
+		
+		
+		if (teacherId){
+		
+		const teacher = await TeacherModel.findOne({_id:teacherId},{_id:1}).lean()
+		if(!teacher) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].teacher)})
+		
+		req.body.teacherId = teacherId
+	}
 
-			const data = await NoticeModel.create({...req.body, teacherId, adminId})
+			const data = await NoticeModel.create({...req.body })
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
 				message: messages[req.userLanguage].add_success.replace('##',  messages[req.userLanguage].notice),
@@ -98,7 +119,7 @@ console.log(start, limit,sorting)
 			const adminId = req?.admin?._id ? req?.admin?._id : ''
 			const teacherId = req?.teacher?._id ? req?.teacher?._id : ''
 			const { classId ='' , studentId =''} = req.body
-			
+
 			const notice = await NoticeModel.findById(req.params.id, { id: 1 }).lean()
 			if(!notice) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].notice)})
 
@@ -110,12 +131,28 @@ console.log(start, limit,sorting)
 
 			if (req.body.studentId){
 				const student = await StudentsModel.findById(studentId, { _id: 1 } ).lean()
-				if(!student) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].notice)})
+				if(!student) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].student)})
 				}
 				req.body = pick(req.body, ['title', 'description', 'classId', 'subject', 'studentId', 'type'])
-
-			//add validation for same teacher add update
-			await NoticeModel.updateOne({ _id: req.params.id },{...req.body, teacherId, adminId })
+			
+				if (adminId){
+				
+						const admin = await AdminModel.findOne({_id: adminId },{ _id: 1}).lean()
+						if(!admin) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].admin)})
+						
+						req.body.adminId = adminId
+				}
+				
+				
+				if (teacherId){
+				
+				const teacher = await TeacherModel.findOne({_id:teacherId},{_id:1}).lean()
+				if(!teacher) return res.status(status.BadRequest).jsonp({status:jsonStatus.BadRequest, message: messages[req.userLanguage].not_exist.replace("##", messages[req.userLanguage].teacher)})
+				
+				req.body.teacherId = teacherId
+			}
+			
+			await NoticeModel.updateOne({ _id: req.params.id },{...req.body })
 			return res.status(status.OK).jsonp({
 				status: jsonStatus.OK,
 				message: messages[req.userLanguage].update_success.replace('##',  messages[req.userLanguage].notice)})

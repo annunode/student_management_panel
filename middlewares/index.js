@@ -1,20 +1,15 @@
 /* eslint-disable no-undef */
 require('dotenv').config()
 const express = require('express')
-// const mongoose = require('mongoose')
 const path = require('path')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const helmet = require('helmet')
 const compression = require('compression')
 const hpp = require('hpp')
-
-const config = require('../config/config')
 const data = require('../data')
 
 module.exports = (app) => {
-	// app.use(morgan('dev'))
-
 	app.use(cors())
 	app.use(helmet())
 	app.use(
@@ -22,9 +17,7 @@ module.exports = (app) => {
 			directives: {
 				defaultSrc: ['\'self\''],
 				scriptSrc: ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''],
-				styleSrc: ['\'self\'', '\'unsafe-inline\''],
-				'img-src': ['\'self\'', config.S3_BUCKET_URL]
-			}
+				styleSrc: ['\'self\'', '\'unsafe-inline\'']			}
 		})
 	)
 	app.disable('x-powered-by')

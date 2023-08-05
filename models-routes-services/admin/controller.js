@@ -12,9 +12,9 @@ const bcrypt = require('bcryptjs')
 class AdminAuth {
   async login(req, res) {
     try {
-      req.body = pick(req.body, ['login', 'password', 'sPushToken', 'sDeviceToken'])
+      req.body = pick(req.body, ['login', 'password', 'pushToken', 'deviceToken'])
       removenull(req.body)
-      let { login, sPushToken, password } = req.body
+      let { login, pushToken, password } = req.body
 
       login = login.toLowerCase().trim()
 
@@ -37,7 +37,7 @@ class AdminAuth {
       const newToken = {
         sToken: jwt.sign({ _id: (admin._id).toHexString() }, config.JWT_SECRET, { expiresIn: config.JWT_VALIDITY }),
         sIpAddress: getIp(req),
-        sPushToken
+        pushToken
       }
 
       // Admin can login in LOGIN_HARD_LIMIT_ADMIN time.
@@ -90,7 +90,7 @@ class AdminAuth {
       if (validateMobile(phoneNumber)) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].invalid.replace('##', messages[req.userLanguage].mobileNumber) })
 
       // We'll check that role that is to be assigned to sub admin is active or not.
-      const role = await RolesModel.findOne({ _id: ObjectId(roleId), status: 'Y' }).lean()
+      const role = await RolesModel.findOne({ _id: ObjectId(roleId), eStatus: 'Y' }).lean()
       if (!role) return res.status(status.NotFound).jsonp({ status: jsonStatus.NotFound, message: messages[req.userLanguage].not_exist.replace('##', messages[req.userLanguage].role) })
 
       const adminExist = await AdminsModel.findOne({ $or: [{ email }, { phoneNumber }, { username }] }).lean()
@@ -108,7 +108,7 @@ class AdminAuth {
   }
   async get(req, res) {
     try {
-      const data = await AdminsModel.findOne({ _id: ObjectId(req.params.id), eType: 'SUB' }, { sName: 1, sUsername: 1, eStatus: 1, sEmail: 1, sMobNum: 1, aPermissions: 1, iRoleId: 1 }).lean()
+      const data = await AdminsModel.findOne({ _id: ObjectId(req.params.id), eType: 'SUB' }, { name: 1, username: 1, status: 1, email: 1, phoneNumber: 1, aPermissions: 1, roleId: 1 }).lean()
 
       if (!data) return res.status(status.NotFound).jsonp({ status: jsonStatus.NotFound, message: messages[req.userLanguage].not_exist.replace('##', messages[req.userLanguage].subAdmin) })
 
@@ -128,9 +128,9 @@ class AdminAuth {
       if (search) {
         query = {
           $or: [
-            { sName: { $regex: new RegExp('^.*' + search + '.*', 'i') } },
-            { sEmail: { $regex: new RegExp('^.*' + search + '.*', 'i') } },
-            { sMobNum: { $regex: new RegExp('^.*' + search + '.*', 'i') } }
+            { name: { $regex: new RegExp('^.*' + search + '.*', 'i') } },
+            { email: { $regex: new RegExp('^.*' + search + '.*', 'i') } },
+            { phoneNumber: { $regex: new RegExp('^.*' + search + '.*', 'i') } }
           ]
         }
       }
@@ -138,12 +138,12 @@ class AdminAuth {
 
       const list = await AdminsModel
         .find(query, {
-          sName: 1,
-          sUsername: 1,
-          sEmail: 1,
-          sMobNum: 1,
+          name: 1,
+          username: 1,
+          email: 1,
+          phoneNumber: 1,
           aPermissions: 1,
-          iRoleId: 1,
+          roleId: 1,
           eStatus: 1,
           dCreatedAt: 1
         })
@@ -162,24 +162,24 @@ class AdminAuth {
   }
   async update(req, res) {
     try {
-      const { sUsername, sEmail, sMobNum, iRoleId, eStatus } = req.body
+      const { username, email, phoneNumber, roleId, status } = req.body
 
-      req.body = pick(req.body, ['iRoleId', 'sName', 'sUsername', 'sEmail', 'sMobNum', 'eStatus'])
+      req.body = pick(req.body, ['roleId', 'name', 'username', 'email', 'phoneNumber', 'status'])
       removenull(req.body)
-      if (eStatus) req.body.eStatus = eStatus
+      if (status) req.body.status = status
 
-      if (!checkAlphanumeric(sUsername)) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].must_alpha_num })
+      if (!checkAlphanumeric(username)) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].must_alpha_num })
 
-      if (validateMobile(sMobNum)) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].invalid.replace('##', messages[req.userLanguage].mobileNumber) })
+      if (validateMobile(phoneNumber)) return res.status(status.BadRequest).jsonp({ status: jsonStatus.BadRequest, message: messages[req.userLanguage].invalid.replace('##', messages[req.userLanguage].mobileNumber) })
 
-      const role = await RolesModel.findOne({ _id: ObjectId(iRoleId), eStatus: 'Y' }).lean()
+      const role = await RolesModel.findOne({ _id: ObjectId(roleId), eStatus: 'Y' }).lean()
       if (!role) return res.status(status.NotFound).jsonp({ status: jsonStatus.NotFound, message: messages[req.userLanguage].not_exist.replace('##', messages[req.userLanguage].role) })
 
 
-      const adminExist = await AdminsModel.findOne({ $or: [{ sEmail }, { sMobNum }, { sUsername }], _id: { $ne: req.params.id } })
-      if (adminExist && adminExist.sUsername === sUsername) return res.status(status.ResourceExist).jsonp({ status: jsonStatus.ResourceExist, message: messages[req.userLanguage].already_exist.replace('##', messages[req.userLanguage].username) })
-      if (adminExist && adminExist.sMobNum === sMobNum) return res.status(status.ResourceExist).jsonp({ status: jsonStatus.ResourceExist, message: messages[req.userLanguage].already_exist.replace('##', messages[req.userLanguage].mobileNumber) })
-      if (adminExist && adminExist.sEmail === sEmail) return res.status(status.ResourceExist).jsonp({ status: jsonStatus.ResourceExist, message: messages[req.userLanguage].already_exist.replace('##', messages[req.userLanguage].email) })
+      const adminExist = await AdminsModel.findOne({ $or: [{ email }, { phoneNumber }, { username }], _id: { $ne: req.params.id } })
+      if (adminExist && adminExist.username === username) return res.status(status.ResourceExist).jsonp({ status: jsonStatus.ResourceExist, message: messages[req.userLanguage].already_exist.replace('##', messages[req.userLanguage].username) })
+      if (adminExist && adminExist.phoneNumber === phoneNumber) return res.status(status.ResourceExist).jsonp({ status: jsonStatus.ResourceExist, message: messages[req.userLanguage].already_exist.replace('##', messages[req.userLanguage].mobileNumber) })
+      if (adminExist && adminExist.email === email) return res.status(status.ResourceExist).jsonp({ status: jsonStatus.ResourceExist, message: messages[req.userLanguage].already_exist.replace('##', messages[req.userLanguage].email) })
 
       const data = await AdminsModel.findOneAndUpdate({ _id: ObjectId(req.params.id), eType: 'SUB' }, { ...req.body }, { new: false, runValidators: true }).lean()
       if (!data) return res.status(status.NotFound).jsonp({ status: jsonStatus.NotFound, message: messages[req.userLanguage].not_exist.replace('##', messages[req.userLanguage].subAdmin) })

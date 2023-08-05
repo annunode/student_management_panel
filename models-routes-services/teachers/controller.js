@@ -102,7 +102,7 @@ async list(req,res) {
 			const userExist = await TeachersModel.findOne({$or:[{ username },{ email }]}, { _id: 1}).lean()
 			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.teacher)})
 			
-			const role = await RolesModel.findOne({_id:roleId, status: 'Y'}).lean()
+			const role = await RolesModel.findOne({_id:roleId, eStatus: 'Y'}).lean()
 			if(!role) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.invalid.replace('##', messages.English.role)})
 			
 
@@ -131,7 +131,7 @@ async list(req,res) {
 			if(userExist) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.already_exist.replace('##', messages.English.teacher)})
 			
 			if(req.body.roleId){
-			const role = await RolesModel.findOne({_id:roleId, status: 'Y'}).lean()
+			const role = await RolesModel.findOne({_id:roleId, eStatus: 'Y'}).lean()
 			if(!role) return res.status(status.BadRequest).jsonp({status: jsonStatus.BadRequest, message: messages.English.invalid.replace('##', messages.English.role)})
 			}
 

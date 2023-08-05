@@ -94,7 +94,7 @@ class attendanceController {
 		limit = parseInt(limit)
   
 		const query = {}
-		if (search) query.sName = { $regex: new RegExp('^.*' + search + '.*', 'i') }
+		if (search) query.name = { $regex: new RegExp('^.*' + search + '.*', 'i') }
   
 		const total = await AttendanceLogsModel.countDocuments(query)
 		const results = await AttendanceLogsModel.find(query).sort(sorting).skip(start).limit(limit).lean()

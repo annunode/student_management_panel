@@ -70,7 +70,7 @@ const studentSchema = new mongoose.Schema({
 studentSchema.statics.filterData = function (student) {
 	student.__v = undefined
 	student.aJwtTokens = undefined
-	student.sPassword = undefined
+	student.password = undefined
 	student.updatedAt = undefined
 	student.password = undefined
 	return student

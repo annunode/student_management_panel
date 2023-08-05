@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const config = require('../config/config')
 
 
-async function connection(DB_URL, maxPoolSize = 10, DB) {
+async function connection(DB_URL) {
 	try {
 		const dbConfig = { useNewUrlParser: true, useUnifiedTopology: true, readPreference: 'secondaryPreferred' }
 		const conn = mongoose.connect(DB_URL, dbConfig)

@@ -16,11 +16,11 @@ const createSubAdmin = [
   body('type').not().isEmpty().isIn(data.adminTypes)
 ]
 const updateSubAdminV2 = [
-  body('sName').not().isEmpty(),
-  body('sUsername').not().isEmpty(),
-  body('sEmail').isEmail().escape(),
-  body('sMobNum').not().isEmpty(),
-  body('iRoleId').not().isEmpty()
+  body('name').not().isEmpty(),
+  body('username').not().isEmpty(),
+  body('email').isEmail().escape(),
+  body('phoneNumber').not().isEmpty(),
+  body('roleId').not().isEmpty()
 ]
 
 module.exports = {

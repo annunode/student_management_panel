@@ -6,6 +6,7 @@ module.exports = {
   permissions: 'Permissions',
   password: 'Password',
   subAdmin: 'Sub Admin',
+  admin: 'Admin',
   student: 'Student',
   students: 'Students',
   teacher: 'Teacher',

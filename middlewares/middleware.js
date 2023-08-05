@@ -1,19 +1,16 @@
+/* eslint-disable no-empty */
 /**
  * Auth middleware containes the common methods to authenticate user or admin by token.
- * @method {validateAdmin('MATCH','R')} is for authenticating the token and make sure its a admin.
+ * @method {validateAdmin('NOTICE','R')} is for authenticating the token and make sure its a admin.
  * @method {isUserAuthenticated} is for authenticating the token.
- * @method {findByToken} is specified in user.model.js
  */
 const jwt = require('jsonwebtoken')
-var Crypt = require('hybrid-crypto-js').Crypt
-var crypt = new Crypt()
 const AdminsModel = require('../models-routes-services/admin/model')
 const mongoose = require('mongoose')
 const ObjectId = mongoose.Types.ObjectId
 const { messages, status, jsonStatus } = require('../helper/api.responses')
 const { validationResult } = require('express-validator')
 const config = require('../config/config')
-const { PRIVATE_KEY } = require('../config/config')
 const RolesModel = require('../models-routes-services/teachers/roles/model')
 const TeachersModel = require('../models-routes-services/teachers/model')
 
@@ -71,15 +68,8 @@ const validateAdmin = (sKey, eType) => {
 				})
 
 				if (!hasPermission) {
-					let hasSubAdminPermission
-					if (sKey === 'DEPOSIT' && eType === 'W') {
-						hasSubAdminPermission = role.aPermissions.find((permission) => {
-							return (
-								permission.sKey === 'SYSTEM_USERS' && permission.eType === 'W'
-							)
-						})
-					}
-					if (!hasSubAdminPermission) {
+
+					if (!hasPermission) {
 						let message
 
 						switch (eType) {
@@ -148,17 +138,6 @@ const validateTeacher = (sKey, eType) => {
 			req.teacher = teacher
 
 			let errors
-			if (req.teacher.type === 'SUPER') {
-				errors = validationResult(req)
-				if (!errors.isEmpty()) {
-					return res.status(status.UnprocessableEntity).jsonp({
-						status: jsonStatus.UnprocessableEntity,
-						errors: errors.array()
-					})
-				}
-
-				return next(null, null)
-			} else {
 				if (!req.teacher.roleId) return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
 
 				const role = await RolesModel.findOne({ _id: ObjectId(req.teacher.roleId), eStatus: 'Y' }, { aPermissions: 1 }).lean()
@@ -173,15 +152,6 @@ const validateTeacher = (sKey, eType) => {
 				})
 
 				if (!hasPermission) {
-					let hasSubAdminPermission
-					if (sKey === 'DEPOSIT' && eType === 'W') {
-						hasSubAdminPermission = role.aPermissions.find((permission) => {
-							return (
-								permission.sKey === 'SYSTEM_USERS' && permission.eType === 'W'
-							)
-						})
-					}
-					if (!hasSubAdminPermission) {
 						let message
 
 						switch (eType) {
@@ -200,8 +170,8 @@ const validateTeacher = (sKey, eType) => {
 							status: jsonStatus.Unauthorized,
 							message
 						})
+					
 					}
-				}
 				errors = validationResult(req)
 				if (!errors.isEmpty()) {
 					return res.status(status.UnprocessableEntity).jsonp({
@@ -211,7 +181,7 @@ const validateTeacher = (sKey, eType) => {
 				}
 
 				return next(null, null)
-			}
+			
 		} catch (error) {
 			return res.status(status.InternalServerError).jsonp({
 				status: jsonStatus.InternalServerError,
@@ -285,18 +255,9 @@ const isTeacherAuthenticated = async (req, res, next) => {
 			})
 		}
 
-		// const isBlackList = await redisClient.get(`BlackListToken:${token}`)
-		// if (isBlackList) {
-		// 	return res.status(status.Unauthorized).jsonp({
-		// 		status: jsonStatus.Unauthorized,
-		// 		message: messages[req.userLanguage].err_unauthorized
-		// 	})
-		// }
-
 		req.teacher= {}
 		let user
 		try {
-			// user = await UsersModel.findByToken(token)
 			user = jwt.verify(token, config.JWT_SECRET)
 		} catch (err) {
 			return res.status(status.Unauthorized).jsonp({
@@ -334,36 +295,6 @@ const isTeacherAuthenticated = async (req, res, next) => {
 			status: jsonStatus.InternalServerError,
 			message: messages[req.userLanguage].error
 		})
-	}
-}
-
-
-
-const decryption = function (password) {
-	const decrypted = crypt.decrypt(PRIVATE_KEY, password)
-	const decryptedData = decrypted.message
-	return decryptedData.toString()
-}
-const decrypt = function (req, res, next) {
-	const { sPassword, sOldPassword, sNewPassword } = req.body
-	if (sPassword) {
-		req.body.sPassword = decryption(sPassword)
-	} else if (sOldPassword && sNewPassword) {
-		req.body.sOldPassword = decryption(sOldPassword)
-		req.body.sNewPassword = decryption(sNewPassword)
-	} else if (!sOldPassword && sNewPassword) {
-		req.body.sNewPassword = decryption(sNewPassword)
-	}
-	next()
-}
-
-const validateFunctionality = (functionality) => {
-	return async function (req, res, next) {
-		if (config.FUNCTIONALITY[functionality]) {
-			return next(null, null)
-		} else {
-			return res.status(status.Unauthorized).jsonp({ status: jsonStatus.Unauthorized, message: messages[req.userLanguage].access_denied })
-		}
 	}
 }
 
@@ -420,9 +351,6 @@ module.exports = {
 	validate,
 	isTeacherAuthenticated,
 	isAdminAuthenticated,
-	decrypt,
-	decryption,
-	validateFunctionality,
 	validateTeacher,
 	isStudentAuthenticated
 }
