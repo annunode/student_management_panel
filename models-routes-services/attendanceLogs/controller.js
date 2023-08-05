@@ -1,4 +1,3 @@
-// const bcrypt = require('bcryptjs')
 const StudentsModel = require('../students/model')
 const ClassModel = require('../class/model')
 const TeachersModel = require('../teachers/model')

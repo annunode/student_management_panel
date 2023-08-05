@@ -311,12 +311,6 @@ const isTeacherAuthenticated = async (req, res, next) => {
 				message: messages[req.userLanguage].err_unauthorized
 			})
 		}
-
-		if (user.eType === 'B') {
-			return res.status(status.NotFound).jsonp({ status: jsonStatus.NotFound, message: messages[req.userLanguage].user_blocked })
-		}
-		// await redisClient.hset(`at:${token}`, '_id', user._id.toString())
-		// await redisClient.expire(`at:${token}`, 86400)
 		req.teacher= user
 		req.teacher._id = ObjectId(user._id)
 

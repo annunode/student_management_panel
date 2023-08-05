@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken')
 const ClassModel = require('../class/model')
 const { gender } = require('../../data')
 const config = require('../../config/config')
+const bcrypt = require('bcryptjs')
+const saltRounds = 1
+const salt = bcrypt.genSaltSync(saltRounds)
 
 const studentSchema = new mongoose.Schema({
 	firstName: {
@@ -83,6 +86,18 @@ studentSchema.statics.findByToken = function (token) {
 	}
 	return student.findOne(query)
 }
+
+studentSchema.pre('save', function (next) {
+	var student = this
+	if (student.isModified('password')) {
+	student.password = bcrypt.hashSync(student.password, salt)
+	}
+	if (student.isModified('email')) {
+	student.email = student.email.toLowerCase()
+	}
+	next()
+  })
+  
 const StudentsModel = mongoose.model('Student', studentSchema)
 
 module.exports = StudentsModel

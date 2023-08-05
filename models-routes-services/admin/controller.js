@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
 const AdminsModel = require('../admin/model')
 const RolesModel = require('../teachers/roles/model')
 const { messages, status, jsonStatus } = require('../../helper/api.responses')
@@ -7,6 +6,8 @@ const { removenull, catchError, pick, checkAlphanumeric, getIp, validateMobile }
 const config = require('../../config/config')
 const mongoose = require('mongoose')
 const ObjectId = mongoose.Types.ObjectId
+const bcrypt = require('bcryptjs')
+
 
 class AdminAuth {
   async login(req, res) {
@@ -26,12 +27,12 @@ class AdminAuth {
         })
       }
 
-        if (password!==admin.password) {
-            return res.status(status.BadRequest).jsonp({
-                status: jsonStatus.BadRequest,
-                message: messages[req.userLanguage].auth_failed
-            })
-        }
+      if (!bcrypt.compareSync(password, admin.password)) {
+        return res.status(status.BadRequest).jsonp({
+          status: jsonStatus.BadRequest,
+          message: messages[req.userLanguage].auth_failed
+        })
+      }
 
       const newToken = {
         sToken: jwt.sign({ _id: (admin._id).toHexString() }, config.JWT_SECRET, { expiresIn: config.JWT_VALIDITY }),

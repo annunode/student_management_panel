@@ -2,7 +2,9 @@ const mongoose = require('mongoose')
 const RolesModel = require('../teachers/roles/model')
 const config = require('../../config/config')
 const jwt = require('jsonwebtoken')
-
+const bcrypt = require('bcryptjs')
+const saltRounds = 1
+const salt = bcrypt.genSaltSync(saltRounds)
 const data = require('../../data')
 
 
@@ -46,6 +48,18 @@ const adminSchema = new mongoose.Schema({
 	},
 	roleId: { type: mongoose.Types.ObjectId , ref:RolesModel, required: true}
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
+
+adminSchema.pre('save', function (next) {
+  var admin = this
+  if (admin.isModified('password')) {
+    admin.password = bcrypt.hashSync(admin.password, salt)
+  }
+  if (admin.isModified('email')) {
+    admin.email = admin.email.toLowerCase()
+  }
+  next()
+})
+
 
 adminSchema.statics.findByToken = function (token) {
 	const admin = this

@@ -1,13 +1,11 @@
 const jwt = require('jsonwebtoken')
-// const bcrypt = require('bcryptjs')
 const TeachersModel = require('../teachers/model')
 const { messages, status, jsonStatus } = require('../../helper/api.responses')
 const { removenull, catchError, pick, getPaginationValues} = require('../../helper/utilities.services')
 const config = require('../../config/config')
 const RolesModel = require('./roles/model')
-const ClassModel = require('../class/model')
-const StudentsModel = require('../students/model')
 const ObjectId = require('mongoose').Types.ObjectId
+const bcrypt = require('bcryptjs')
 
 class TeacherAuth {
 	async login(req, res) {
@@ -15,10 +13,7 @@ class TeacherAuth {
 			req.body = pick(req.body, ['login', 'password'])
 			removenull(req.body)
 			let { login, sPushToken, password } = req.body
-			// check rate limit for password sending from same ip at multiple time. we'll make sure not too many request from same ip will occurs.
-			// const rateLimit = await checkRateLimit(5, `rlpassword:${login}`, getIp(req))
-			// if (rateLimit === 'LIMIT_REACHED') return res.status(status.TooManyRequest).jsonp({ status: jsonStatus.TooManyRequest, message: messages[req.userLanguage].limit_reached.replace('##', messages[req.userLanguage].password) })
-  
+			
 			login = String(login).toLowerCase().trim()
   
 			let teacher = await TeachersModel.findOne({ $or: [{ email: login }, { phoneNumber: login }, { username: login }], status: 'Y' })
@@ -31,10 +26,10 @@ class TeacherAuth {
 				})
 			}
   
-			if (password!==teacher.password) {
+			if (!bcrypt.compareSync(password, teacher.password)) {
 				return res.status(status.BadRequest).jsonp({
-					status: jsonStatus.BadRequest,
-					message: messages[req.userLanguage].auth_failed
+				status: jsonStatus.BadRequest,
+				message: messages[req.userLanguage].auth_failed
 				})
 			}
 
@@ -43,10 +38,6 @@ class TeacherAuth {
 				sToken: jwt.sign({ _id: (teacher._id).toHexString() }, config.JWT_SECRET, { expiresIn: config.JWT_VALIDITY }),
 				sPushToken
 			}
-  
-			// teacher can login in LOGIN_HARD_LIMIT_teacher time.
-			// for e.g. LOGIN_HARD_LIMIT_teacher=5 -> teacher can login only for 5 times, After that we'll remove first login token from db.
-	
   
 			teacher.dLoginAt = new Date()
 			await teacher.save()
@@ -68,8 +59,6 @@ async list(req,res) {
 		try{
 			const { start, limit, sorting } = getPaginationValues(req.query)
 			let query = { status: 'Y' }
-
-			const loggedInStudent = req?.student?.id			
 
 			const data = await TeachersModel.find(query).skip(start).limit(limit).sort(sorting).lean()
             const total = await TeachersModel.countDocuments(query)

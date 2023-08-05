@@ -1,12 +1,11 @@
 const jwt = require('jsonwebtoken')
-// const bcrypt = require('bcryptjs')
 const StudentsModel = require('../students/model')
 const { messages, status, jsonStatus } = require('../../helper/api.responses')
 const { removenull, catchError, pick, getPaginationValues} = require('../../helper/utilities.services')
 const config = require('../../config/config')
-// const TeachersModel = require('../teachers/model')
 const ClassModel = require('../class/model')
-const TeacherModel = require('../teachers/model')
+const bcrypt = require('bcryptjs')
+
 
 class StudentAuth {
 	async login(req, res) {
@@ -14,9 +13,6 @@ class StudentAuth {
 			req.body = pick(req.body, ['login', 'password'])
 			removenull(req.body)
 			let { login, sPushToken, password } = req.body
-			// check rate limit for password sending from same ip at multiple time. we'll make sure not too many request from same ip will occurs.
-			// const rateLimit = await checkRateLimit(5, `rlpassword:${login}`, getIp(req))
-			// if (rateLimit === 'LIMIT_REACHED') return res.status(status.TooManyRequest).jsonp({ status: jsonStatus.TooManyRequest, message: messages[req.userLanguage].limit_reached.replace('##', messages[req.userLanguage].password) })
   
 			login = String(login).toLowerCase().trim()
   
@@ -30,10 +26,10 @@ class StudentAuth {
 				})
 			}
   
-			if (password!==student.password) {
+			if (!bcrypt.compareSync(password, student.password)) {
 				return res.status(status.BadRequest).jsonp({
-					status: jsonStatus.BadRequest,
-					message: messages[req.userLanguage].auth_failed
+				status: jsonStatus.BadRequest,
+				message: messages[req.userLanguage].auth_failed
 				})
 			}
 
@@ -141,3 +137,4 @@ class StudentAuth {
 }
 
 module.exports = new StudentAuth()
+

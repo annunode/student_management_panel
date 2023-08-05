@@ -6,8 +6,6 @@ module.exports = {
   permissions: 'Permissions',
   password: 'Password',
   subAdmin: 'Sub Admin',
-  feedback: 'Feedback',
-  checkUser: 'User exist checked',
   student: 'Student',
   students: 'Students',
   teacher: 'Teacher',

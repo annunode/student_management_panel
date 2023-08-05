@@ -3,6 +3,9 @@ const mongoose = require('mongoose')
 const config = require('../../config/config')
 const jwt = require('jsonwebtoken')
 const RolesModel = require('./roles/model')
+const bcrypt = require('bcryptjs')
+const saltRounds = 1
+const salt = bcrypt.genSaltSync(saltRounds)
 
 const teacherSchema = new mongoose.Schema({
 	name: {
@@ -58,6 +61,19 @@ teacherSchema.statics.findByToken = function (token) {
 	}
 	return teacher.findOne(query)
 }
+
+teacherSchema.pre('save', function (next) {
+	var teacher = this
+	if (teacher.isModified('password')) {
+	  teacher.password = bcrypt.hashSync(teacher.password, salt)
+	}
+	if (teacher.isModified('email')) {
+	  teacher.email = teacher.email.toLowerCase()
+	}
+	next()
+  })
+  
+
 const TeacherModel = mongoose.model('Teacher', teacherSchema)
 
 module.exports = TeacherModel
