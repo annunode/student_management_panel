@@ -22,7 +22,8 @@ const addStudent = [
 	body('username').not().isEmpty().isAlphanumeric(),
 	body('address').optional().isString(),
 	body('status').optional().isIn(status),
-	body('rollNo').not().isEmpty().isString()
+	body('rollNo').not().isEmpty().isString(),
+	body('grNo').not().isEmpty().isString()
 ]
 const updateStudent = [
 		body('classId').optional().isMongoId(),

@@ -61,7 +61,10 @@ const studentSchema = new mongoose.Schema({
 			required: true
 		}
 	,
-	rollNo:{ type:String, required:true}
+	rollNo: { type: String, required: true },
+	grNo: { type: String, required: true },
+	motherName:  { type: String },
+	fatherName:  { type: String },
 },{ timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } })
 
 studentSchema.statics.filterData = function (student) {
